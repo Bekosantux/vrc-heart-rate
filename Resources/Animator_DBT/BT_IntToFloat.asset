@@ -24,7 +24,7 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: HR
     m_Mirror: 0
-  m_BlendParameter: HR
+  m_BlendParameter: VRCOSC/Heartrate/Value
   m_BlendParameterY: Blend
   m_MinThreshold: 0
   m_MaxThreshold: 255

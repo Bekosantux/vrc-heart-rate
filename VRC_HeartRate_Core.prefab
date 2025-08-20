@@ -73,7 +73,6 @@ GameObject:
   - component: {fileID: 1892130321892913467}
   - component: {fileID: 2331349284140689159}
   - component: {fileID: 7191349922660195852}
-  - component: {fileID: 5760421292209180483}
   - component: {fileID: 3136130165909974855}
   m_Layer: 0
   m_Name: VRC_HeartRate_Core
@@ -108,7 +107,7 @@ Animator:
   m_GameObject: {fileID: 4993247993125414371}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: d49ca6b048f58ce44a3e6a64545877df, type: 2}
+  m_Controller: {fileID: 9100000, guid: 015caba5ea4eedc49b4c3849e2a49bd3, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -131,33 +130,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bb122659f724ebf85fe095ac02dc339, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animator: {fileID: 9100000, guid: d49ca6b048f58ce44a3e6a64545877df, type: 2}
+  animator: {fileID: 9100000, guid: 015caba5ea4eedc49b4c3849e2a49bd3, type: 2}
   layerType: 5
   deleteAttachedAnimator: 1
   pathMode: 0
-  matchAvatarWriteDefaults: 0
+  matchAvatarWriteDefaults: 1
   relativePathRoot:
     referencePath: 
     targetObject: {fileID: 0}
-  layerPriority: 0
+  layerPriority: -1
   mergeAnimatorMode: 0
---- !u!114 &5760421292209180483
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4993247993125414371}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 229dd561ca024a6588e388160921a70f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  BlendTree: {fileID: 20600000, guid: b2d825edd14bc88499b7ea7a512f4c55, type: 2}
-  PathMode: 0
-  RelativePathRoot:
-    referencePath: 
-    targetObject: {fileID: 0}
 --- !u!114 &3136130165909974855
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,7 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parameters:
-  - nameOrPrefix: HR
+  - nameOrPrefix: VRCOSC/Heartrate/Value
     remapTo: 
     internalParameter: 0
     isPrefix: 0
@@ -226,11 +208,21 @@ MonoBehaviour:
     internalParameter: 0
     isPrefix: 0
     syncType: 3
-    localOnly: 0
+    localOnly: 1
     defaultValue: 0
     saved: 0
     hasExplicitDefaultValue: 1
     m_overrideAnimatorDefaults: 0
+  - nameOrPrefix: VCRHR/Blend
+    remapTo: 
+    internalParameter: 0
+    isPrefix: 0
+    syncType: 2
+    localOnly: 1
+    defaultValue: 1
+    saved: 0
+    hasExplicitDefaultValue: 1
+    m_overrideAnimatorDefaults: 1
 --- !u!1 &6539666896191541224
 GameObject:
   m_ObjectHideFlags: 0
