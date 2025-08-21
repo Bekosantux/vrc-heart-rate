@@ -49,6 +49,10 @@ namespace BekoShop.VRCHeartRate
         // Undo時の自動再配置抑制
         private static bool suppressAutoPlacement = false;
 
+        private bool _placementScheduled;
+        // OnValidate が呼ばれた時点の Undo グループ
+        private int _validateUndoGroup = -1;
+
         private void OnEnable()
         {
             Undo.undoRedoPerformed -= OnUndoRedo;
@@ -68,8 +72,15 @@ namespace BekoShop.VRCHeartRate
 
         private void OnUndoRedo()
         {
+            // 予約していた遅延呼び出しをキャンセル
+            if (_placementScheduled)
+            {
+                EditorApplication.delayCall -= DelayedValidateAndProcess;
+                _placementScheduled = false;
+            }
+
             suppressAutoPlacement = true;
-            ValidateAndProcess();
+            ValidateAndProcess();        // ここでは再配置しない
             suppressAutoPlacement = false;
         }
 
@@ -86,8 +97,16 @@ namespace BekoShop.VRCHeartRate
         private void OnValidate()
         {
             if (Application.isPlaying) return;
-            // 配列長は固定想定のため保証処理は行わない
-            ValidateAndProcess();
+
+            // 今の Undo グループ ID を記録しておく
+            _validateUndoGroup = Undo.GetCurrentGroup();
+
+            // 既に予約済みなら重複予約しない
+            if (!_placementScheduled)
+            {
+                _placementScheduled = true;
+                EditorApplication.delayCall += DelayedValidateAndProcess;
+            }
         }
 
         public void ValidateAndProcess()
@@ -96,6 +115,37 @@ namespace BekoShop.VRCHeartRate
             if (suppressAutoPlacement) return;
 
             PlaceParentAndOptionsIfNeeded();
+        }
+
+        private void DelayedValidateAndProcess()
+        {
+            // 予約を解除
+            EditorApplication.delayCall -= DelayedValidateAndProcess;
+            _placementScheduled = false;
+
+            // オブジェクトが消えていたら何もしない
+            if (this == null) return;
+            if (suppressAutoPlacement) return;
+
+            // 新しいグループを開く
+            Undo.IncrementCurrentGroup();
+            int myGroup = Undo.GetCurrentGroup();
+
+            // ここで階層を書き換える
+            PlaceParentAndOptionsIfNeeded();
+
+            /* 重要！
+               OnValidate 時に取得したグループと結合して
+               「ユーザ操作＋自動配置」を１つの操作にまとめる */
+            if (_validateUndoGroup >= 0)
+            {
+                Undo.CollapseUndoOperations(_validateUndoGroup);
+                _validateUndoGroup = -1;
+            }
+            else
+            {
+                Undo.CollapseUndoOperations(myGroup);
+            }
         }
 
         // 外部アクセス（Editor用）
@@ -190,6 +240,9 @@ namespace BekoShop.VRCHeartRate
                     parentGO.transform.localScale = Vector3.one;
                     Undo.RegisterCreatedObjectUndo(parentGO, "Auto Place Parent Container");
                     parentNode = parentGO.transform;
+
+                    // 英語でログ出力（親プレハブ）
+                    Debug.Log($"AutoAssetPlacer: Placed parent container prefab '{parentGO.name}'.", this);
                 }
             }
 
@@ -232,7 +285,8 @@ namespace BekoShop.VRCHeartRate
 
                 if (createdCount > 0)
                 {
-                    Debug.Log($"AutoAssetPlacer: {createdCount} 個のオプションプレハブを自動配置しました。", this);
+                    // 英語でログ出力（子オプション）
+                    Debug.Log($"AutoAssetPlacer: Automatically placed {createdCount} option prefab(s).", this);
                 }
             }
 
