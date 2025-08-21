@@ -11,60 +11,60 @@ namespace BekoShop.VRCHeartRate
         private bool showSettings = false;
         private ReorderableList reorderableList;
 
+        // GUIContent をキャッシュして GC Alloc を減らす
+        private static readonly GUIContent settingsLabel = new GUIContent("Developer Settings");
+        private static readonly GUIContent forceButtonLabel = new GUIContent("Force Check and Place");
+
         private void OnEnable()
         {
             AutoAssetPlacer placer = (AutoAssetPlacer)target;
+
+            // null チェック（エラー防止）
+            if (placer.targetPrefabs == null) return;
 
             // ReorderableListを初期化
             reorderableList = new ReorderableList(
                 placer.targetPrefabs,
                 typeof(GameObject),
-                true,  // draggable
-                true,  // displayHeader
-                true,  // displayAddButton
-                true   // displayRemoveButton
+                true, true, true, true
             );
 
-            reorderableList.drawHeaderCallback = (Rect rect) =>
-            {
+            reorderableList.drawHeaderCallback = rect =>
                 EditorGUI.LabelField(rect, "Target Prefabs");
-            };
 
             reorderableList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                if (index >= 0 && index < placer.targetPrefabs.Count)
-                {
-                    var element = placer.targetPrefabs[index];
-                    var newElement = EditorGUI.ObjectField(
-                        new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
-                        element,
-                        typeof(GameObject),
-                        false
-                    ) as GameObject;
+                if (index < 0 || index >= placer.targetPrefabs.Count) return;
 
-                    // 重複チェック
-                    if (newElement != element)
+                var element = placer.targetPrefabs[index];
+                var newElement = EditorGUI.ObjectField(
+                    new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                    element,
+                    typeof(GameObject),
+                    false
+                ) as GameObject;
+
+                if (newElement != element)
+                {
+                    if (newElement == null || !placer.targetPrefabs.Contains(newElement))
                     {
-                        if (newElement == null || !placer.targetPrefabs.Contains(newElement))
-                        {
-                            placer.targetPrefabs[index] = newElement;
-                            EditorUtility.SetDirty(target);
-                        }
-                        else if (newElement != null)
-                        {
-                            Debug.LogWarning("このプレハブは既にリストに存在します。");
-                        }
+                        placer.targetPrefabs[index] = newElement;
+                        EditorUtility.SetDirty(target);
+                    }
+                    else if (newElement != null)
+                    {
+                        Debug.LogWarning("このプレハブは既にリストに存在します。");
                     }
                 }
             };
 
-            reorderableList.onAddCallback = (ReorderableList list) =>
+            reorderableList.onAddCallback = list =>
             {
                 placer.targetPrefabs.Add(null);
                 EditorUtility.SetDirty(target);
             };
 
-            reorderableList.onRemoveCallback = (ReorderableList list) =>
+            reorderableList.onRemoveCallback = list =>
             {
                 if (list.index >= 0 && list.index < placer.targetPrefabs.Count)
                 {
@@ -78,27 +78,29 @@ namespace BekoShop.VRCHeartRate
         {
             AutoAssetPlacer placer = (AutoAssetPlacer)target;
 
-            // AvatarRoot配置検証
-            if (!placer.IsValidPlacement())
+            // 配置検証結果表示
+            bool isValid = placer.IsValidPlacement();
+            if (!isValid)
             {
                 EditorGUILayout.HelpBox(placer.GetErrorMessage(), MessageType.Warning);
                 EditorGUILayout.Space();
             }
             else
             {
-                EditorGUILayout.HelpBox("このスクリプトは削除しないでください。\nPlease don't delete this script.", MessageType.Info);
+                EditorGUILayout.HelpBox(placer.GetErrorMessage(), MessageType.Info);
+                EditorGUILayout.Space();
             }
 
             EditorGUI.BeginChangeCheck();
 
-            // 設定をフォールドアウトで隠す
-            showSettings = EditorGUILayout.Foldout(showSettings, "Developer Settings", true);
+            // 設定フォールドアウト
+            showSettings = EditorGUILayout.Foldout(showSettings, settingsLabel, true);
 
             if (showSettings)
             {
                 EditorGUI.indentLevel++;
 
-                // ReorderableListを描画
+                // リスト描画
                 if (reorderableList != null)
                 {
                     reorderableList.DoLayoutList();
@@ -108,9 +110,9 @@ namespace BekoShop.VRCHeartRate
 
                 EditorGUILayout.Space();
 
-                // 有効な配置の場合のみボタンを有効化
-                EditorGUI.BeginDisabledGroup(!placer.IsValidPlacement());
-                if (GUILayout.Button("Force Check and Place"))
+                // ボタン
+                EditorGUI.BeginDisabledGroup(!isValid);
+                if (GUILayout.Button(forceButtonLabel))
                 {
                     placer.ValidateAndProcess();
                 }
