@@ -159,9 +159,7 @@ namespace BekoShop.VRCHeartRate
         private void PlaceNewObjects(List<GameObject> prefabsToPlace)
         {
             if (prefabsToPlace == null || prefabsToPlace.Count == 0) return;
-            if (transform.parent == null) return;
 
-            // 単一のUndo操作として全てのプレハブを配置
             UnityEditor.Undo.IncrementCurrentGroup();
             int group = UnityEditor.Undo.GetCurrentGroup();
 
@@ -171,10 +169,15 @@ namespace BekoShop.VRCHeartRate
             {
                 if (prefab == null) continue;
 
-                GameObject newObject = UnityEditor.PrefabUtility.InstantiatePrefab(prefab, transform.parent) as GameObject;
+                // 親を指定せずInstantiateし、あとでSetParentすることでPrefabアセット関連のエラーを回避
+                GameObject newObject = UnityEditor.PrefabUtility.InstantiatePrefab(prefab) as GameObject;
 
                 if (newObject != null)
                 {
+                    if (transform.parent != null)
+                    {
+                        newObject.transform.SetParent(transform.parent);
+                    }
                     newObject.transform.localPosition = Vector3.zero;
                     newObject.transform.localRotation = Quaternion.identity;
                     newObject.transform.localScale = Vector3.one;
@@ -184,7 +187,6 @@ namespace BekoShop.VRCHeartRate
                 }
             }
 
-            // 全ての操作を単一のUndo操作にまとめる
             UnityEditor.Undo.CollapseUndoOperations(group);
 
             if (createdObjects.Count > 0)

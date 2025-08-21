@@ -232,7 +232,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4453671752370800501}
-  - component: {fileID: 7805902439646048004}
+  - component: {fileID: 7331786389951521102}
   - component: {fileID: 1946790789829063826}
   m_Layer: 0
   m_Name: VRCMenu
@@ -257,7 +257,7 @@ Transform:
   - {fileID: 2961235878426700290}
   m_Father: {fileID: 1892130321892913467}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7805902439646048004
+--- !u!114 &7331786389951521102
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
