@@ -8,7 +8,7 @@ namespace BekoShop.VRCHeartRate
     [CustomEditor(typeof(AutoAssetPlacer))]
     public class AutoAssetPlacerEditor : Editor
     {
-        private bool showSettings = true;
+        private bool showSettings = false;
 
         private static readonly GUIContent gcDeveloperSettings = new GUIContent("Developer Settings");
         private static readonly GUIContent gcParentPrefab = new GUIContent("Parent Container Prefab");
