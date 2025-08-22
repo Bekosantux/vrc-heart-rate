@@ -14,5 +14,13 @@
   "oscmodule.status.active": "Active",
   "oscmodule.status.inactive": "Inactive",
   "oscmodule.status.default": "Default",
-  "oscmodule.status.editoronly": "EditorOnly"
+  "oscmodule.status.editoronly": "EditorOnly",
+  "placer.message.dont_delete": "Please do not delete this script.",
+  "placer.error.no_parent_prefab": "Parent prefab is not set.",
+  "placer.warning.no_option_selected": "No options selected. Please select at least one.",
+  "placer.error.no_child_prefab": "Child prefab for an enabled option is not set.",
+  "placer.foldout.developer": "Developer Settings",
+  "placer.tooltip.parent_container": "Parent Container Prefab",
+  "placer.message.debug_mode_only": "Prefab setting fields are only visible in Debug mode.",
+  "placer.button.force_check": "Force Check & Place"
 }

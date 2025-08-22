@@ -14,5 +14,13 @@
   "oscmodule.status.active": "有効",
   "oscmodule.status.inactive": "無効",
   "oscmodule.status.default": "Default",
-  "oscmodule.status.editoronly": "EditorOnly"
+  "oscmodule.status.editoronly": "EditorOnly",
+  "placer.message.dont_delete": "このスクリプトは削除しないでください。",
+  "placer.error.no_parent_prefab": "親プレハブが設定されていません。",
+  "placer.warning.no_option_selected": "オプションが一つも選択されていません。少なくとも1つ選択してください。",
+  "placer.error.no_child_prefab": "有効化されたオプションに対応する子プレハブが未設定です。",
+  "placer.foldout.developer": "開発者向け設定",
+  "placer.tooltip.parent_container": "親コンテナプレハブ",
+  "placer.message.debug_mode_only": "プレハブ設定フィールドはDebugモードでのみ表示されます。",
+  "placer.button.force_check": "強制チェック＆配置"
 }
