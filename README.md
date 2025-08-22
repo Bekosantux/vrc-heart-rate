@@ -1,4 +1,4 @@
 VRC Heart Rate Project
-v0.3.0-a
+v0.4.0
 
-For details: https://bekosantux.github.io/ShopDoc/VRCHeartRate
+For details, see: https://bekosantux.github.io/ShopDoc/VRCHeartRate
