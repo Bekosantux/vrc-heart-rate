@@ -162,6 +162,16 @@ namespace BekoShop.VRCHeartRate
             return _statusMessage;
         }
 
+        public bool HasAnyOptionEnabled()
+        {
+            if (optionEnabled == null) return false;
+            for (int i = 0; i < optionEnabled.Length; i++)
+            {
+                if (optionEnabled[i]) return true;
+            }
+            return false;
+        }
+
         public IEnumerable<int> EnabledSlots()
         {
             for (int i = 0; i < 8; i++)
@@ -233,20 +243,22 @@ namespace BekoShop.VRCHeartRate
                         parentNode = parentGO.transform;
                         isNewParent = true;
 
-                        Debug.Log($"AutoAssetPlacer: Created new parent container prefab '{parentGO.name}'.", this);
+                        // ログのContextを生成されたオブジェクト自身に変更
+                        Debug.Log($"AutoAssetPlacer: Created new parent container prefab '{parentGO.name}'.", parentGO);
                     }
                 }
             }
             else
             {
-                // 既存の親プレハブを使用する場合のログ
-                Debug.Log($"AutoAssetPlacer: Using existing parent container prefab '{parentNode.name}'.", this);
+                // 既存の親プレハブを使用する場合のログ（Contextを既存オブジェクトに変更）
+                Debug.Log($"AutoAssetPlacer: Using existing parent container prefab '{parentNode.name}'.", parentNode.gameObject);
             }
 
             // 親が存在するなら子の不足分を配置
             if (parentNode != null)
             {
                 int createdCount = 0;
+                List<GameObject> createdChildren = new List<GameObject>();
 
                 foreach (int slot in EnabledSlots())
                 {
@@ -276,6 +288,7 @@ namespace BekoShop.VRCHeartRate
                             childGO.transform.localScale = Vector3.one;
                             Undo.RegisterCreatedObjectUndo(childGO, $"Auto Place Option {OptionLabels[slot]}");
                             createdCount++;
+                            createdChildren.Add(childGO);
                         }
                     }
                 }
@@ -283,7 +296,13 @@ namespace BekoShop.VRCHeartRate
                 if (createdCount > 0)
                 {
                     string parentType = isNewParent ? "new" : "existing";
-                    Debug.Log($"AutoAssetPlacer: Added {createdCount} option prefab(s) to {parentType} parent container.", this);
+                    Debug.Log($"AutoAssetPlacer: Added {createdCount} option prefab(s) to {parentType} parent container.", parentNode.gameObject);
+
+                    // 各子オブジェクトにも個別ログ（Contextを各子オブジェクトに設定）
+                    foreach (var child in createdChildren)
+                    {
+                        Debug.Log($"AutoAssetPlacer: Added option prefab '{child.name}'.", child);
+                    }
                 }
             }
 
@@ -291,7 +310,9 @@ namespace BekoShop.VRCHeartRate
         }
 
         /// <summary>
-        /// NDMF の AvatarRootPath() を使ってアバタールートのTransformを取得
+        /// AvatarRootPath() を使ってアバタールートのTransformを取得
+        /// this.AvatarRootPath() はスクリプトプレハブのアバタールートからの相対パスを返すため、
+        /// 実際のアバタールートオブジェクトを見つけて返す
         /// </summary>
         private Transform GetAvatarRootTransform()
         {
@@ -305,15 +326,17 @@ namespace BekoShop.VRCHeartRate
                 Transform current = transform;
 
                 // AvatarRootPath() で取得したパスの階層数分だけ親を辿る
+                // パスが "/" で始まる場合は除去
                 if (avatarRootPath.StartsWith("/"))
                     avatarRootPath = avatarRootPath.Substring(1);
 
                 string[] pathSegments = avatarRootPath.Split('/');
 
+                // パスの階層数分だけ親を辿る（自分自身を含む）
                 for (int i = 0; i < pathSegments.Length; i++)
                 {
                     if (current.parent == null)
-                        return null;
+                        return null; // 親がない場合は失敗
                     current = current.parent;
                 }
 
