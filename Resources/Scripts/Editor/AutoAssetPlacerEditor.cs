@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace BekoShop.VRCHeartRate
@@ -71,40 +72,93 @@ namespace BekoShop.VRCHeartRate
             {
                 EditorGUI.indentLevel++;
 
-                EditorGUI.BeginChangeCheck();
-
-                // 親プレハブ
-                var newParent = (GameObject)EditorGUILayout.ObjectField(gcParentPrefab, parentPrefab, typeof(GameObject), false);
-                if (newParent != parentPrefab)
+                // Debug モードでのみプレハブ設定フィールドを表示
+                if (EditorGUIUtility.GetControlID(FocusType.Passive) != 0 &&
+                    (EditorApplication.isPlaying || Application.isPlaying || Debug.isDebugBuild ||
+                     EditorPrefs.GetBool("DeveloperMode", false) ||
+                     EditorGUIUtility.GetControlID(FocusType.Passive) < 0)) // 通常は表示しない
                 {
-                    placer.SetParentContainerPrefab(newParent);
+                    // この条件では表示されない（より確実な方法を使用）
                 }
 
-                EditorGUILayout.Space(4);
+                // Unity の Debug モードでのみプレハブフィールドを表示
+                bool isDebugMode = EditorGUIUtility.GetControlID(FocusType.Passive) < 0 ||
+                                   InternalEditorUtility.GetIsInspectorExpanded(target);
 
-                var enabled = placer.GetOptionEnabled();
-                var prefabs = placer.GetOptionPrefabs();
+                // より確実な Debug モード判定: Inspector の Debug モードをチェック
+                var inspectorWindow = EditorWindow.focusedWindow;
+                bool showPrefabFields = false;
 
-                for (int i = 0; i < 8; i++)
+                if (inspectorWindow != null && inspectorWindow.GetType().Name == "InspectorWindow")
                 {
-                    EditorGUILayout.BeginHorizontal();
-                    bool newFlag = EditorGUILayout.ToggleLeft(AutoAssetPlacer.OptionLabels[i], enabled[i], GUILayout.Width(120));
-                    if (newFlag != enabled[i])
+                    var inspectorModeInfo = inspectorWindow.GetType().GetProperty("inspectorMode",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (inspectorModeInfo != null)
                     {
-                        placer.SetOptionEnabled((AutoAssetPlacer.OptionSlot)i, newFlag);
+                        var mode = inspectorModeInfo.GetValue(inspectorWindow);
+                        showPrefabFields = mode != null && mode.ToString() == "Debug";
                     }
-
-                    var newChild = (GameObject)EditorGUILayout.ObjectField(prefabs[i], typeof(GameObject), false);
-                    if (newChild != prefabs[i])
-                    {
-                        placer.SetOptionPrefab((AutoAssetPlacer.OptionSlot)i, newChild);
-                    }
-                    EditorGUILayout.EndHorizontal();
                 }
 
-                if (EditorGUI.EndChangeCheck())
+                if (showPrefabFields)
                 {
-                    EditorUtility.SetDirty(target);
+                    EditorGUI.BeginChangeCheck();
+
+                    // 親プレハブ
+                    var newParent = (GameObject)EditorGUILayout.ObjectField(gcParentPrefab, parentPrefab, typeof(GameObject), false);
+                    if (newParent != parentPrefab)
+                    {
+                        placer.SetParentContainerPrefab(newParent);
+                    }
+
+                    EditorGUILayout.Space(4);
+
+                    var enabled = placer.GetOptionEnabled();
+                    var prefabs = placer.GetOptionPrefabs();
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        EditorGUILayout.BeginHorizontal();
+                        bool newFlag = EditorGUILayout.ToggleLeft(AutoAssetPlacer.OptionLabels[i], enabled[i], GUILayout.Width(120));
+                        if (newFlag != enabled[i])
+                        {
+                            placer.SetOptionEnabled((AutoAssetPlacer.OptionSlot)i, newFlag);
+                        }
+
+                        var newChild = (GameObject)EditorGUILayout.ObjectField(prefabs[i], typeof(GameObject), false);
+                        if (newChild != prefabs[i])
+                        {
+                            placer.SetOptionPrefab((AutoAssetPlacer.OptionSlot)i, newChild);
+                        }
+                        EditorGUILayout.EndHorizontal();
+                    }
+
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        EditorUtility.SetDirty(target);
+                    }
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox("プレハブ設定フィールドはDebugモードでのみ表示されます。", MessageType.Info);
+
+                    // オプションの有効/無効のみ表示（プレハブ参照は非表示）
+                    EditorGUI.BeginChangeCheck();
+                    var enabled = placer.GetOptionEnabled();
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        bool newFlag = EditorGUILayout.ToggleLeft(AutoAssetPlacer.OptionLabels[i], enabled[i]);
+                        if (newFlag != enabled[i])
+                        {
+                            placer.SetOptionEnabled((AutoAssetPlacer.OptionSlot)i, newFlag);
+                        }
+                    }
+
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        EditorUtility.SetDirty(target);
+                    }
                 }
 
                 EditorGUILayout.Space();
