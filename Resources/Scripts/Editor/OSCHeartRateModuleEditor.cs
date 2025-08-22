@@ -7,7 +7,7 @@ using nadena.dev.ndmf.localization;
 namespace BekoShop.VRCHeartRate
 {
     [CustomEditor(typeof(OSCHeartRateModule))]
-    public class OSCHeartRateModuleEditor : UnityEditor.Editor
+    public class OSCHeartRateModuleEditor : Editor
     {
         #if UNITY_EDITOR
         private bool showGameObjectSettings = false;
@@ -96,6 +96,8 @@ namespace BekoShop.VRCHeartRate
                 DisplayObjectStatus(S("oscmodule.status.auto"), module.AutoControlObject, module.RemoveManualControl);
                 DisplayObjectStatus(S("oscmodule.status.additional"), module.AdditionalSettingsObject, !module.RemoveManualControl);
             }
+
+            ShowLanguageUI();
         }
 
         private void DisplayObjectStatus(string objectName, GameObject obj, bool shouldBeActive)
