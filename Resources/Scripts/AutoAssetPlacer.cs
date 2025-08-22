@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using nadena.dev.ndmf;
+
 #if UNITY_EDITOR
 using UnityEditor;
 using nadena.dev.ndmf.util;
@@ -7,7 +9,7 @@ using nadena.dev.ndmf.util;
 
 namespace BekoShop.VRCHeartRate
 {
-    public class AutoAssetPlacer : MonoBehaviour, VRC.SDKBase.IEditorOnly
+    public class AutoAssetPlacer : MonoBehaviour, INDMFEditorOnly
     {
 #if UNITY_EDITOR
         public enum OptionSlot
@@ -86,14 +88,10 @@ namespace BekoShop.VRCHeartRate
             EnsureValidPlacement();
         }
 
-        private void Start()
-        {
-            if (!Application.isPlaying) ValidateAndProcess();
-        }
-
         private void OnValidate()
         {
-            if (Application.isPlaying) return;
+            if (EditorApplication.isPlaying) return;
+            if (BuildPipeline.isBuildingPlayer) return; // ビルド時は実行しない
 
             // 今の Undo グループ ID を記録しておく
             _validateUndoGroup = Undo.GetCurrentGroup();
@@ -110,6 +108,8 @@ namespace BekoShop.VRCHeartRate
         {
             if (!EnsureValidPlacement()) return;
             if (suppressAutoPlacement) return;
+            if (EditorApplication.isPlaying) return;
+            if (BuildPipeline.isBuildingPlayer) return; // ビルド時は実行しない
 
             PlaceParentAndOptionsIfNeeded();
         }
@@ -123,6 +123,7 @@ namespace BekoShop.VRCHeartRate
             // オブジェクトが消えていたら何もしない
             if (this == null) return;
             if (suppressAutoPlacement) return;
+            if (BuildPipeline.isBuildingPlayer) return; // ビルド時は実行しない
 
             // 新しいグループを開く
             Undo.IncrementCurrentGroup();
@@ -215,7 +216,11 @@ namespace BekoShop.VRCHeartRate
 
             // アバタールートの取得
             Transform avatarRoot = GetAvatarRootTransform();
-            if (avatarRoot == null) return;
+            if (avatarRoot == null) 
+            {
+                Debug.LogWarning("AutoAssetPlacer: Avatar root not found. Script must be placed inside an avatar hierarchy.", this);
+                return; // アバタールートが見つからない場合は処理を中止
+            }
 
             // 既存の親プレハブをアバタールートから GUID で検索（幅優先探索）
             string wantedGuid = GetPrefabAssetGUID(parentContainerPrefab);
