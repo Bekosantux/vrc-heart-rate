@@ -27,15 +27,13 @@ namespace BekoShop.VRCHeartRate
             }
             else
             {
-                // 常に注意喚起を表示
                 EditorGUILayout.HelpBox("このスクリプトは削除しないでください。\nPlease don't delete this script.", MessageType.Info);
             }
 
-            // 追加の警告: 親未設定 / オプション未選択 / 必須プレハブ未設定
             var parentPrefab = placer.GetParentContainerPrefab();
             if (parentPrefab == null)
             {
-                EditorGUILayout.HelpBox("親プレハブが設定されていません。", MessageType.Warning);
+                EditorGUILayout.HelpBox("親プレハブが設定されていません。", MessageType.Error);
             }
 
             var optsEnabled = placer.GetOptionEnabled();
@@ -62,7 +60,7 @@ namespace BekoShop.VRCHeartRate
             }
             if (hasEnabledButMissingPrefab)
             {
-                EditorGUILayout.HelpBox("有効化されたオプションに対応する子プレハブが未設定です。", MessageType.Warning);
+                EditorGUILayout.HelpBox("有効化されたオプションに対応する子プレハブが未設定です。", MessageType.Error);
             }
 
             EditorGUILayout.Space();
@@ -84,7 +82,6 @@ namespace BekoShop.VRCHeartRate
 
                 EditorGUILayout.Space(4);
 
-                // オプション行（8固定）
                 var enabled = placer.GetOptionEnabled();
                 var prefabs = placer.GetOptionPrefabs();
 
