@@ -1,71 +1,89 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 #if UNITY_EDITOR
-using nadena.dev.ndmf.util;
 using UnityEditor;
+using nadena.dev.ndmf.util;
 #endif
 
 namespace BekoShop.VRCHeartRate
 {
-    [ExecuteAlways]
     public class AutoAssetPlacer : MonoBehaviour, VRC.SDKBase.IEditorOnly
     {
 #if UNITY_EDITOR
-        // 定数定義
-        private const string MESSAGE_DELETE_WARNING = "このスクリプトは削除しないでください。\nDon't delete this script.";
-        private const string MESSAGE_OUTSIDE_AVATAR = "アバターの内部に配置してください。\nPlace this inside the avatar.";
+        public enum OptionSlot
+        {
+            FX = 0,
+            Additive = 1,
+            Action = 2,
+            Gesture = 3,
+            Base = 4,
+            Sitting = 5,
+            TPose = 6,
+            IKPose = 7
+        }
 
-        [SerializeField, HideInInspector]
-        private List<GameObject> _targetPrefabs = new List<GameObject>();
+        public static readonly string[] OptionLabels = new[]
+        {
+            "FX","Additive","Action","Gesture","Base","Sitting","TPose","IKPose"
+        };
 
-        // public プロパティは直接フィールドにする（パフォーマンス向上）
-        public List<GameObject> targetPrefabs => _targetPrefabs;
+        [Header("Prefabs")]
+        [SerializeField, Tooltip("アバター内に1つだけ配置する親プレハブ（必須）")]
+        private GameObject parentContainerPrefab;
 
-        // キャッシュするためreadonly
+        [SerializeField, Tooltip("各オプションに対応する子プレハブ")]
+        private GameObject[] optionPrefabs = new GameObject[8];
+
+        [Header("Options")]
+        [SerializeField, Tooltip("各オプションを配置するかどうか")]
+        private bool[] optionEnabled = new bool[8];
+
+        // 状態
         private bool _isValidPlacement = false;
-        private string _errorMessage = "";
-
-        // 状態キャッシュの有効期限
+        private string _statusMessage = "";
         private int _lastValidationFrame = -1;
 
-        // Undo/Redoで自動配置しないように状態を保持
+        // Undo時の自動再配置抑制
         private static bool suppressAutoPlacement = false;
+
+        private bool _placementScheduled;
+        // OnValidate が呼ばれた時点の Undo グループ
+        private int _validateUndoGroup = -1;
 
         private void OnEnable()
         {
-            // イベントを一度クリアしてから登録（重複登録防止）
-            UnityEditor.Undo.undoRedoPerformed -= OnUndoRedo;
-            UnityEditor.Undo.undoRedoPerformed += OnUndoRedo;
+            Undo.undoRedoPerformed -= OnUndoRedo;
+            Undo.undoRedoPerformed += OnUndoRedo;
 
-            UnityEditor.EditorApplication.hierarchyChanged -= OnHierarchyChanged;
-            UnityEditor.EditorApplication.hierarchyChanged += OnHierarchyChanged;
+            EditorApplication.hierarchyChanged -= OnHierarchyChanged;
+            EditorApplication.hierarchyChanged += OnHierarchyChanged;
 
-            // 初回検証
             ValidateAndProcess();
         }
 
         private void OnDisable()
         {
-            // イベント解除を忘れない
-            UnityEditor.Undo.undoRedoPerformed -= OnUndoRedo;
-            UnityEditor.EditorApplication.hierarchyChanged -= OnHierarchyChanged;
+            Undo.undoRedoPerformed -= OnUndoRedo;
+            EditorApplication.hierarchyChanged -= OnHierarchyChanged;
         }
 
         private void OnUndoRedo()
         {
+            // 予約していた遅延呼び出しをキャンセル
+            if (_placementScheduled)
+            {
+                EditorApplication.delayCall -= DelayedValidateAndProcess;
+                _placementScheduled = false;
+            }
+
             suppressAutoPlacement = true;
-            ValidateAndProcess();
+            ValidateAndProcess();        // ここでは再配置しない
             suppressAutoPlacement = false;
         }
 
         private void OnHierarchyChanged()
         {
-            // 検証のみ行い、結果をキャッシュ（_lastValidationFrameを更新）
-            ValidateAvatarRootPlacement();
-
-            // 必要なビューのみ再描画
-            EditorUtility.SetDirty(this);
+            EnsureValidPlacement();
         }
 
         private void Start()
@@ -77,187 +95,305 @@ namespace BekoShop.VRCHeartRate
         {
             if (Application.isPlaying) return;
 
-            // 遅延実行で警告を出さないようにする
-            EditorApplication.delayCall += _OnValidate;
-        }
+            // 今の Undo グループ ID を記録しておく
+            _validateUndoGroup = Undo.GetCurrentGroup();
 
-        private void _OnValidate()
-        {
-            EditorApplication.delayCall -= _OnValidate;
-
-            RemoveDuplicatesFromList();
-            ValidateAndProcess();
+            // 既に予約済みなら重複予約しない
+            if (!_placementScheduled)
+            {
+                _placementScheduled = true;
+                EditorApplication.delayCall += DelayedValidateAndProcess;
+            }
         }
 
         public void ValidateAndProcess()
         {
             if (!EnsureValidPlacement()) return;
+            if (suppressAutoPlacement) return;
 
-            if (!suppressAutoPlacement)
+            PlaceParentAndOptionsIfNeeded();
+        }
+
+        private void DelayedValidateAndProcess()
+        {
+            // 予約を解除
+            EditorApplication.delayCall -= DelayedValidateAndProcess;
+            _placementScheduled = false;
+
+            // オブジェクトが消えていたら何もしない
+            if (this == null) return;
+            if (suppressAutoPlacement) return;
+
+            // 新しいグループを開く
+            Undo.IncrementCurrentGroup();
+            int myGroup = Undo.GetCurrentGroup();
+
+            // ここで階層を書き換える
+            PlaceParentAndOptionsIfNeeded();
+
+            /* 重要！
+               OnValidate 時に取得したグループと結合して
+               「ユーザ操作＋自動配置」を１つの操作にまとめる */
+            if (_validateUndoGroup >= 0)
             {
-                CheckAndPlaceObjects();
+                Undo.CollapseUndoOperations(_validateUndoGroup);
+                _validateUndoGroup = -1;
+            }
+            else
+            {
+                Undo.CollapseUndoOperations(myGroup);
             }
         }
 
-        /// <summary>
-        /// アバターRoot検証を行い結果をキャッシュします
-        /// </summary>
-        private bool EnsureValidPlacement()
-        {
-            // 同一フレーム内では再検証しない（パフォーマンス向上）
-            if (_lastValidationFrame == Time.frameCount)
-                return _isValidPlacement;
+        // 外部アクセス（Editor用）
+        public GameObject GetParentContainerPrefab() => parentContainerPrefab;
+        public void SetParentContainerPrefab(GameObject prefab) => parentContainerPrefab = prefab;
 
-            return ValidateAvatarRootPlacement();
+        public GameObject[] GetOptionPrefabs() => optionPrefabs;
+        public void SetOptionPrefab(OptionSlot slot, GameObject prefab) => optionPrefabs[(int)slot] = prefab;
+
+        public bool[] GetOptionEnabled() => optionEnabled;
+        public void SetOptionEnabled(OptionSlot slot, bool enabled) => optionEnabled[(int)slot] = enabled;
+
+        public bool IsValidPlacement() => EnsureValidPlacement();
+        public string GetStatusMessage()
+        {
+            EnsureValidPlacement();
+            return _statusMessage;
         }
 
-        private bool ValidateAvatarRootPlacement()
+        public bool HasAnyOptionEnabled()
         {
+            if (optionEnabled == null) return false;
+            for (int i = 0; i < optionEnabled.Length; i++)
+            {
+                if (optionEnabled[i]) return true;
+            }
+            return false;
+        }
+
+        public IEnumerable<int> EnabledSlots()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                if (optionEnabled != null && i < optionEnabled.Length && optionEnabled[i]) yield return i;
+            }
+        }
+
+        // -------------------- 内部実装 --------------------
+
+        private bool EnsureValidPlacement()
+        {
+            if (_lastValidationFrame == Time.frameCount) return _isValidPlacement;
             _lastValidationFrame = Time.frameCount;
 
             try
             {
                 string avatarRootPath = this.AvatarRootPath();
-
                 if (string.IsNullOrEmpty(avatarRootPath))
                 {
                     _isValidPlacement = false;
-                    _errorMessage = MESSAGE_OUTSIDE_AVATAR;
-                    return false;
+                    _statusMessage = "アバターの内部に配置してください。\nPlease place this inside the avatar.";
+                    return _isValidPlacement;
                 }
 
                 _isValidPlacement = true;
-                _errorMessage = MESSAGE_DELETE_WARNING;
-                return true;
+                _statusMessage = "このスクリプトは削除しないでください。\nPlease don't delete this script.";
+                return _isValidPlacement;
             }
             catch (System.Exception ex)
             {
                 _isValidPlacement = false;
-                _errorMessage = $"Error validating avatar root: {ex.Message}";
-                return false;
+                _statusMessage = $"Error validating avatar root: {ex.Message}";
+                return _isValidPlacement;
             }
         }
 
-        private void CheckAndPlaceObjects()
+        private void PlaceParentAndOptionsIfNeeded()
         {
-            if (_targetPrefabs == null || _targetPrefabs.Count == 0) return;
+            if (parentContainerPrefab == null) return;
 
-            Transform parentTransform = transform.parent;
-            if (parentTransform == null) return;
+            // アバタールートの取得
+            Transform avatarRoot = GetAvatarRootTransform();
+            if (avatarRoot == null) return;
 
-            // 事前に配列サイズを確保して GC Alloc を減らす
-            List<GameObject> prefabsToPlace = new List<GameObject>(_targetPrefabs.Count);
+            // 既存の親プレハブをアバタールートから GUID で検索（幅優先探索）
+            string wantedGuid = GetPrefabAssetGUID(parentContainerPrefab);
+            Transform parentNode = FindPrefabInstanceByGUID(avatarRoot, wantedGuid);
 
-            foreach (GameObject prefab in _targetPrefabs)
-            {
-                if (prefab == null) continue;
-
-                bool objectExists = false;
-                int childCount = parentTransform.childCount;
-
-                for (int i = 0; i < childCount; i++)
-                {
-                    Transform child = parentTransform.GetChild(i);
-                    if (child == transform) continue;
-                    if (child.name == prefab.name)
-                    {
-                        objectExists = true;
-                        break;
-                    }
-                }
-
-                if (!objectExists)
-                {
-                    prefabsToPlace.Add(prefab);
-                }
-            }
-
-            if (prefabsToPlace.Count > 0)
-            {
-                PlaceNewObjects(prefabsToPlace);
-            }
-        }
-
-        private void PlaceNewObjects(List<GameObject> prefabsToPlace)
-        {
-            if (prefabsToPlace.Count == 0) return;
-
-            // 単一の Undo グループで処理
             Undo.IncrementCurrentGroup();
             int group = Undo.GetCurrentGroup();
 
-            int createdCount = 0;
-            Transform parent = transform.parent;
+            bool isNewParent = false;
 
-            foreach (GameObject prefab in prefabsToPlace)
+            // 親が存在しない場合のみ新規生成（スクリプトと同階層に配置）
+            if (parentNode == null)
             {
-                if (prefab == null) continue;
-
-                GameObject newObject = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-                if (newObject == null) continue;
-
-                if (parent != null)
+                Transform siblingsParent = transform.parent;
+                if (siblingsParent != null)
                 {
-                    newObject.transform.SetParent(parent);
+                    GameObject parentGO = PrefabUtility.InstantiatePrefab(parentContainerPrefab) as GameObject;
+                    if (parentGO != null)
+                    {
+                        parentGO.transform.SetParent(siblingsParent);
+                        parentGO.transform.localPosition = Vector3.zero;
+                        parentGO.transform.localRotation = Quaternion.identity;
+                        parentGO.transform.localScale = Vector3.one;
+                        Undo.RegisterCreatedObjectUndo(parentGO, "Auto Place Parent Container");
+                        parentNode = parentGO.transform;
+                        isNewParent = true;
+
+                        // ログのContextを生成されたオブジェクト自身に変更
+                        Debug.Log($"AutoAssetPlacer: Created new parent container prefab '{parentGO.name}'.", parentGO);
+                    }
+                }
+            }
+            else
+            {
+                // 既存の親プレハブを使用する場合のログ（Contextを既存オブジェクトに変更）
+                Debug.Log($"AutoAssetPlacer: Using existing parent container prefab '{parentNode.name}'.", parentNode.gameObject);
+            }
+
+            // 親が存在するなら子の不足分を配置
+            if (parentNode != null)
+            {
+                int createdCount = 0;
+                List<GameObject> createdChildren = new List<GameObject>();
+
+                foreach (int slot in EnabledSlots())
+                {
+                    var childPrefab = optionPrefabs[slot];
+                    if (childPrefab == null) continue;
+
+                    // 親の直下に同名オブジェクトが存在するか確認
+                    bool exists = false;
+                    for (int i = 0; i < parentNode.childCount; i++)
+                    {
+                        var child = parentNode.GetChild(i);
+                        if (child.name == childPrefab.name)
+                        {
+                            exists = true;
+                            break;
+                        }
+                    }
+
+                    if (!exists)
+                    {
+                        GameObject childGO = PrefabUtility.InstantiatePrefab(childPrefab) as GameObject;
+                        if (childGO != null)
+                        {
+                            childGO.transform.SetParent(parentNode);
+                            childGO.transform.localPosition = Vector3.zero;
+                            childGO.transform.localRotation = Quaternion.identity;
+                            childGO.transform.localScale = Vector3.one;
+                            Undo.RegisterCreatedObjectUndo(childGO, $"Auto Place Option {OptionLabels[slot]}");
+                            createdCount++;
+                            createdChildren.Add(childGO);
+                        }
+                    }
                 }
 
-                newObject.transform.localPosition = Vector3.zero;
-                newObject.transform.localRotation = Quaternion.identity;
-                newObject.transform.localScale = Vector3.one;
+                if (createdCount > 0)
+                {
+                    string parentType = isNewParent ? "new" : "existing";
+                    Debug.Log($"AutoAssetPlacer: Added {createdCount} option prefab(s) to {parentType} parent container.", parentNode.gameObject);
 
-                Undo.RegisterCreatedObjectUndo(newObject, "Auto Place Objects");
-                createdCount++;
+                    // 各子オブジェクトにも個別ログ（Contextを各子オブジェクトに設定）
+                    foreach (var child in createdChildren)
+                    {
+                        Debug.Log($"AutoAssetPlacer: Added option prefab '{child.name}'.", child);
+                    }
+                }
             }
 
             Undo.CollapseUndoOperations(group);
+        }
 
-            if (createdCount > 0)
+        /// <summary>
+        /// AvatarRootPath() を使ってアバタールートのTransformを取得
+        /// this.AvatarRootPath() はスクリプトプレハブのアバタールートからの相対パスを返すため、
+        /// 実際のアバタールートオブジェクトを見つけて返す
+        /// </summary>
+        private Transform GetAvatarRootTransform()
+        {
+            try
             {
-                Debug.Log($"AutoAssetPlacer: {createdCount}個のオブジェクトを自動配置しました。");
+                string avatarRootPath = this.AvatarRootPath();
+                if (string.IsNullOrEmpty(avatarRootPath))
+                    return null;
+
+                // スクリプトプレハブから親を辿ってアバタールートを見つける
+                Transform current = transform;
+
+                // AvatarRootPath() で取得したパスの階層数分だけ親を辿る
+                // パスが "/" で始まる場合は除去
+                if (avatarRootPath.StartsWith("/"))
+                    avatarRootPath = avatarRootPath.Substring(1);
+
+                string[] pathSegments = avatarRootPath.Split('/');
+
+                // パスの階層数分だけ親を辿る（自分自身を含む）
+                for (int i = 0; i < pathSegments.Length; i++)
+                {
+                    if (current.parent == null)
+                        return null; // 親がない場合は失敗
+                    current = current.parent;
+                }
+
+                return current;
+            }
+            catch
+            {
+                return null;
             }
         }
 
-        private void RemoveDuplicatesFromList()
+        private static string GetPrefabAssetGUID(GameObject prefabAsset)
         {
-            if (_targetPrefabs == null) return;
-
-            // 必要な場合のみ新しいリストを作成
-            bool hasNull = false;
-            bool hasDuplicates = false;
-
-            // null チェックとユニーク性の確認
-            var uniqueItems = new HashSet<GameObject>();
-            foreach (var prefab in _targetPrefabs)
-            {
-                if (prefab == null)
-                {
-                    hasNull = true;
-                }
-                else if (!uniqueItems.Add(prefab))
-                {
-                    hasDuplicates = true;
-                }
-
-                // nullと重複の両方が見つかった場合早期終了
-                if (hasNull && hasDuplicates) break;
-            }
-
-            // 重複またはnullがある場合のみリストを再構築
-            if (hasNull || hasDuplicates)
-            {
-                _targetPrefabs = _targetPrefabs
-                    .Where(prefab => prefab != null)
-                    .Distinct()
-                    .ToList();
-            }
+            if (prefabAsset == null) return null;
+            var path = AssetDatabase.GetAssetPath(prefabAsset);
+            if (string.IsNullOrEmpty(path)) return null;
+            return AssetDatabase.AssetPathToGUID(path);
         }
 
-        public bool IsValidPlacement() => EnsureValidPlacement();
-
-        public string GetErrorMessage()
+        /// <summary>
+        /// 指定されたルートから幅優先でプレハブインスタンスを探索し、GUIDが一致するものを返す
+        /// </summary>
+        private static Transform FindPrefabInstanceByGUID(Transform root, string wantedGuid)
         {
-            EnsureValidPlacement();
-            return _errorMessage;
+            if (root == null || string.IsNullOrEmpty(wantedGuid)) return null;
+
+            var queue = new Queue<Transform>();
+            queue.Enqueue(root);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+
+                // currentがプレハブインスタンスのルートかチェック
+                var prefabRoot = PrefabUtility.GetNearestPrefabInstanceRoot(current.gameObject);
+                if (prefabRoot != null && prefabRoot == current.gameObject)
+                {
+                    // プレハブアセットのGUIDを取得
+                    string path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(current.gameObject);
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        string guid = AssetDatabase.AssetPathToGUID(path);
+                        if (guid == wantedGuid)
+                        {
+                            return current;
+                        }
+                    }
+                }
+
+                // 子要素をキューに追加
+                for (int i = 0; i < current.childCount; i++)
+                {
+                    queue.Enqueue(current.GetChild(i));
+                }
+            }
+
+            return null;
         }
 #endif
     }

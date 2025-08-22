@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &525498999914401184
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2017235094289126293}
+  - component: {fileID: 3999270583344958901}
+  m_Layer: 0
+  m_Name: ScriptSample
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2017235094289126293
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 525498999914401184}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3999270583344958901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 525498999914401184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bbf88d4819ba948a6701a4d2079118, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parentContainerPrefab: {fileID: 4993247993125414371, guid: 6dbf4a48bbbb4a94aa341c9bb10ed4b3, type: 3}
+  optionPrefabs:
+  - {fileID: 7036335310699709992, guid: eeaabc1791e7dc342adb27787c06cfde, type: 3}
+  - {fileID: 7626633872235614102, guid: 6960739eb48bf584a887d2ec3cc969fe, type: 3}
+  - {fileID: 7626633872235614102, guid: 812f367588f6a804db991535c9cbf2b6, type: 3}
+  - {fileID: 7626633872235614102, guid: 9778f1986995721409d8109c2ad1a077, type: 3}
+  - {fileID: 7626633872235614102, guid: 0c6023668be49f94d898df34397f4024, type: 3}
+  - {fileID: 7626633872235614102, guid: 3dff468f024bee540be440c30ef60b05, type: 3}
+  - {fileID: 7626633872235614102, guid: a86da79b6607a404aa757a2b88435c67, type: 3}
+  - {fileID: 7626633872235614102, guid: 795438a8494b90641920661bd78dea17, type: 3}
+  optionEnabled: 0000000000000000
