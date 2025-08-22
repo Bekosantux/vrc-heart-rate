@@ -1,7 +1,7 @@
 ﻿#if UNITY_EDITOR
 using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
+using static BekoShop.VRCHeartRate.LocalizationManager;
 
 namespace BekoShop.VRCHeartRate
 {
@@ -9,10 +9,6 @@ namespace BekoShop.VRCHeartRate
     public class AutoAssetPlacerEditor : Editor
     {
         private bool showSettings = false;
-
-        private static readonly GUIContent gcDeveloperSettings = new GUIContent("Developer Settings");
-        private static readonly GUIContent gcParentPrefab = new GUIContent("Parent Container Prefab");
-        private static readonly GUIContent gcForceButton = new GUIContent("Force Check and Place");
 
         public override void OnInspectorGUI()
         {
@@ -23,18 +19,19 @@ namespace BekoShop.VRCHeartRate
 
             if (!isValid)
             {
+                // GetStatusMessageはコンポーネント側で生成されるため、そのまま表示
                 EditorGUILayout.HelpBox(placer.GetStatusMessage(), MessageType.Warning);
                 EditorGUILayout.Space();
             }
             else
             {
-                EditorGUILayout.HelpBox("このスクリプトは削除しないでください。\nPlease don't delete this script.", MessageType.Info);
+                EditorGUILayout.HelpBox(S("placer.message.dont_delete"), MessageType.Info);
             }
 
             var parentPrefab = placer.GetParentContainerPrefab();
             if (parentPrefab == null)
             {
-                EditorGUILayout.HelpBox("親プレハブが設定されていません。", MessageType.Error);
+                EditorGUILayout.HelpBox(S("placer.error.no_parent_prefab"), MessageType.Error);
             }
 
             var optsEnabled = placer.GetOptionEnabled();
@@ -57,17 +54,17 @@ namespace BekoShop.VRCHeartRate
 
             if (!anyEnabled)
             {
-                EditorGUILayout.HelpBox("オプションが一つも選択されていません。少なくとも1つ選択してください。", MessageType.Warning);
+                EditorGUILayout.HelpBox(S("placer.warning.no_option_selected"), MessageType.Warning);
             }
             if (hasEnabledButMissingPrefab)
             {
-                EditorGUILayout.HelpBox("有効化されたオプションに対応する子プレハブが未設定です。", MessageType.Error);
+                EditorGUILayout.HelpBox(S("placer.error.no_child_prefab"), MessageType.Error);
             }
 
             EditorGUILayout.Space();
 
             // 開発者設定
-            showSettings = EditorGUILayout.Foldout(showSettings, gcDeveloperSettings, true);
+            showSettings = EditorGUILayout.Foldout(showSettings, S("placer.foldout.developer"), true);
             if (showSettings)
             {
                 EditorGUI.indentLevel++;
@@ -92,7 +89,7 @@ namespace BekoShop.VRCHeartRate
                     EditorGUI.BeginChangeCheck();
 
                     // 親プレハブ
-                    var newParent = (GameObject)EditorGUILayout.ObjectField(gcParentPrefab, parentPrefab, typeof(GameObject), false);
+                    var newParent = (GameObject)EditorGUILayout.ObjectField(S("placer.tooltip.parent_container"), parentPrefab, typeof(GameObject), false);
                     if (newParent != parentPrefab)
                     {
                         placer.SetParentContainerPrefab(newParent);
@@ -127,7 +124,7 @@ namespace BekoShop.VRCHeartRate
                 }
                 else
                 {
-                    EditorGUILayout.HelpBox("プレハブ設定フィールドはDebugモードでのみ表示されます。", MessageType.Info);
+                    EditorGUILayout.HelpBox(S("placer.message.debug_mode_only"), MessageType.Info);
 
                     // オプションの有効/無効のみ表示（プレハブ参照は非表示）
                     EditorGUI.BeginChangeCheck();
@@ -152,7 +149,7 @@ namespace BekoShop.VRCHeartRate
 
                 // 強制実行
                 EditorGUI.BeginDisabledGroup(!isValid);
-                if (GUILayout.Button(gcForceButton))
+                if (GUILayout.Button(S("placer.button.force_check")))
                 {
                     placer.ValidateAndProcess();
                 }
@@ -160,6 +157,8 @@ namespace BekoShop.VRCHeartRate
 
                 EditorGUI.indentLevel--;
             }
+
+            ShowLanguageUI();
         }
     }
 }
