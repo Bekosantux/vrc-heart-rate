@@ -72,20 +72,7 @@ namespace BekoShop.VRCHeartRate
             {
                 EditorGUI.indentLevel++;
 
-                // Debug モードでのみプレハブ設定フィールドを表示
-                if (EditorGUIUtility.GetControlID(FocusType.Passive) != 0 &&
-                    (EditorApplication.isPlaying || Application.isPlaying || Debug.isDebugBuild ||
-                     EditorPrefs.GetBool("DeveloperMode", false) ||
-                     EditorGUIUtility.GetControlID(FocusType.Passive) < 0)) // 通常は表示しない
-                {
-                    // この条件では表示されない（より確実な方法を使用）
-                }
-
-                // Unity の Debug モードでのみプレハブフィールドを表示
-                bool isDebugMode = EditorGUIUtility.GetControlID(FocusType.Passive) < 0 ||
-                                   InternalEditorUtility.GetIsInspectorExpanded(target);
-
-                // より確実な Debug モード判定: Inspector の Debug モードをチェック
+                // Debug モード判定
                 var inspectorWindow = EditorWindow.focusedWindow;
                 bool showPrefabFields = false;
 
