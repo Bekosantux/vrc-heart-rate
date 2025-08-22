@@ -1,10 +1,11 @@
+using nadena.dev.ndmf.localization;
+using nadena.dev.ndmf.ui;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
-using nadena.dev.ndmf.localization;
 
 namespace BekoShop.VRCHeartRate
 {
@@ -99,6 +100,13 @@ namespace BekoShop.VRCHeartRate
                 _cache[lang] = null;
                 return null;
             }
+        }
+
+        public static void ShowLanguageUI()
+        {
+            EditorGUILayout.Separator();
+
+            LanguageSwitcher.DrawImmediate();
         }
     }
 }
