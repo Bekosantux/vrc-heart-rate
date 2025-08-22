@@ -2,13 +2,11 @@ using UnityEngine;
 using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEngine.SceneManagement;
 using nadena.dev.ndmf.util;
 #endif
 
 namespace BekoShop.VRCHeartRate
 {
-    // アバター内に親プレハブを1つ配置し、その子として選択されたオプションプレハブを不足分だけ配置する
     public class AutoAssetPlacer : MonoBehaviour, VRC.SDKBase.IEditorOnly
     {
 #if UNITY_EDITOR
@@ -24,7 +22,6 @@ namespace BekoShop.VRCHeartRate
             IKPose = 7
         }
 
-        // Editor から参照するため public
         public static readonly string[] OptionLabels = new[]
         {
             "FX","Additive","Action","Gesture","Base","Sitting","TPose","IKPose"
@@ -34,11 +31,11 @@ namespace BekoShop.VRCHeartRate
         [SerializeField, Tooltip("アバター内に1つだけ配置する親プレハブ（必須）")]
         private GameObject parentContainerPrefab;
 
-        [SerializeField, Tooltip("各オプションに対応する子プレハブ（要素数8・インデックスは OptionSlot に対応）")]
+        [SerializeField, Tooltip("各オプションに対応する子プレハブ")]
         private GameObject[] optionPrefabs = new GameObject[8];
 
         [Header("Options")]
-        [SerializeField, Tooltip("各オプションを配置するかどうか（要素数8・インデックスは OptionSlot に対応）")]
+        [SerializeField, Tooltip("各オプションを配置するかどうか")]
         private bool[] optionEnabled = new bool[8];
 
         // 状態
@@ -165,16 +162,6 @@ namespace BekoShop.VRCHeartRate
             return _statusMessage;
         }
 
-        public bool HasAnyOptionEnabled()
-        {
-            if (optionEnabled == null) return false;
-            for (int i = 0; i < optionEnabled.Length; i++)
-            {
-                if (optionEnabled[i]) return true;
-            }
-            return false;
-        }
-
         public IEnumerable<int> EnabledSlots()
         {
             for (int i = 0; i < 8; i++)
@@ -214,36 +201,46 @@ namespace BekoShop.VRCHeartRate
 
         private void PlaceParentAndOptionsIfNeeded()
         {
-            // 親プレハブ必須（フォールバック生成はしない）
             if (parentContainerPrefab == null) return;
 
-            // 親はスクリプトプレハブと同階層（同じ親の子）に配置する
-            Transform siblingsParent = transform.parent;
-            if (siblingsParent == null) return;
+            // アバタールートの取得
+            Transform avatarRoot = GetAvatarRootTransform();
+            if (avatarRoot == null) return;
 
-            // 既存の親プレハブを GUID で検索（同階層内のみ）
+            // 既存の親プレハブをアバタールートから GUID で検索（幅優先探索）
             string wantedGuid = GetPrefabAssetGUID(parentContainerPrefab);
-            Transform parentNode = FindSiblingPrefabInstanceByGUID(siblingsParent, wantedGuid);
+            Transform parentNode = FindPrefabInstanceByGUID(avatarRoot, wantedGuid);
 
             Undo.IncrementCurrentGroup();
             int group = Undo.GetCurrentGroup();
 
-            // 親が存在しない場合は生成
+            bool isNewParent = false;
+
+            // 親が存在しない場合のみ新規生成（スクリプトと同階層に配置）
             if (parentNode == null)
             {
-                GameObject parentGO = PrefabUtility.InstantiatePrefab(parentContainerPrefab) as GameObject;
-                if (parentGO != null)
+                Transform siblingsParent = transform.parent;
+                if (siblingsParent != null)
                 {
-                    parentGO.transform.SetParent(siblingsParent);
-                    parentGO.transform.localPosition = Vector3.zero;
-                    parentGO.transform.localRotation = Quaternion.identity;
-                    parentGO.transform.localScale = Vector3.one;
-                    Undo.RegisterCreatedObjectUndo(parentGO, "Auto Place Parent Container");
-                    parentNode = parentGO.transform;
+                    GameObject parentGO = PrefabUtility.InstantiatePrefab(parentContainerPrefab) as GameObject;
+                    if (parentGO != null)
+                    {
+                        parentGO.transform.SetParent(siblingsParent);
+                        parentGO.transform.localPosition = Vector3.zero;
+                        parentGO.transform.localRotation = Quaternion.identity;
+                        parentGO.transform.localScale = Vector3.one;
+                        Undo.RegisterCreatedObjectUndo(parentGO, "Auto Place Parent Container");
+                        parentNode = parentGO.transform;
+                        isNewParent = true;
 
-                    // 英語でログ出力（親プレハブ）
-                    Debug.Log($"AutoAssetPlacer: Placed parent container prefab '{parentGO.name}'.", this);
+                        Debug.Log($"AutoAssetPlacer: Created new parent container prefab '{parentGO.name}'.", this);
+                    }
                 }
+            }
+            else
+            {
+                // 既存の親プレハブを使用する場合のログ
+                Debug.Log($"AutoAssetPlacer: Using existing parent container prefab '{parentNode.name}'.", this);
             }
 
             // 親が存在するなら子の不足分を配置
@@ -285,12 +282,47 @@ namespace BekoShop.VRCHeartRate
 
                 if (createdCount > 0)
                 {
-                    // 英語でログ出力（子オプション）
-                    Debug.Log($"AutoAssetPlacer: Automatically placed {createdCount} option prefab(s).", this);
+                    string parentType = isNewParent ? "new" : "existing";
+                    Debug.Log($"AutoAssetPlacer: Added {createdCount} option prefab(s) to {parentType} parent container.", this);
                 }
             }
 
             Undo.CollapseUndoOperations(group);
+        }
+
+        /// <summary>
+        /// NDMF の AvatarRootPath() を使ってアバタールートのTransformを取得
+        /// </summary>
+        private Transform GetAvatarRootTransform()
+        {
+            try
+            {
+                string avatarRootPath = this.AvatarRootPath();
+                if (string.IsNullOrEmpty(avatarRootPath))
+                    return null;
+
+                // スクリプトプレハブから親を辿ってアバタールートを見つける
+                Transform current = transform;
+
+                // AvatarRootPath() で取得したパスの階層数分だけ親を辿る
+                if (avatarRootPath.StartsWith("/"))
+                    avatarRootPath = avatarRootPath.Substring(1);
+
+                string[] pathSegments = avatarRootPath.Split('/');
+
+                for (int i = 0; i < pathSegments.Length; i++)
+                {
+                    if (current.parent == null)
+                        return null;
+                    current = current.parent;
+                }
+
+                return current;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private static string GetPrefabAssetGUID(GameObject prefabAsset)
@@ -301,28 +333,43 @@ namespace BekoShop.VRCHeartRate
             return AssetDatabase.AssetPathToGUID(path);
         }
 
-        private static Transform FindSiblingPrefabInstanceByGUID(Transform siblingsParent, string wantedGuid)
+        /// <summary>
+        /// 指定されたルートから幅優先でプレハブインスタンスを探索し、GUIDが一致するものを返す
+        /// </summary>
+        private static Transform FindPrefabInstanceByGUID(Transform root, string wantedGuid)
         {
-            if (siblingsParent == null || string.IsNullOrEmpty(wantedGuid)) return null;
+            if (root == null || string.IsNullOrEmpty(wantedGuid)) return null;
 
-            for (int i = 0; i < siblingsParent.childCount; i++)
+            var queue = new Queue<Transform>();
+            queue.Enqueue(root);
+
+            while (queue.Count > 0)
             {
-                var child = siblingsParent.GetChild(i);
+                var current = queue.Dequeue();
 
-                // この child がプレハブインスタンスのルートか確認
-                var root = PrefabUtility.GetNearestPrefabInstanceRoot(child.gameObject);
-                if (root == null || root != child.gameObject) continue;
-
-                // そのプレハブインスタンスの元アセットGUIDを取得
-                string path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(child.gameObject);
-                if (string.IsNullOrEmpty(path)) continue;
-
-                string guid = AssetDatabase.AssetPathToGUID(path);
-                if (guid == wantedGuid)
+                // currentがプレハブインスタンスのルートかチェック
+                var prefabRoot = PrefabUtility.GetNearestPrefabInstanceRoot(current.gameObject);
+                if (prefabRoot != null && prefabRoot == current.gameObject)
                 {
-                    return child;
+                    // プレハブアセットのGUIDを取得
+                    string path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(current.gameObject);
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        string guid = AssetDatabase.AssetPathToGUID(path);
+                        if (guid == wantedGuid)
+                        {
+                            return current;
+                        }
+                    }
+                }
+
+                // 子要素をキューに追加
+                for (int i = 0; i < current.childCount; i++)
+                {
+                    queue.Enqueue(current.GetChild(i));
                 }
             }
+
             return null;
         }
 #endif
