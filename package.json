@@ -3,7 +3,9 @@
   "displayName": "VRC Heart Rate",
   "version": "0.6.0",
   "author": {
-    "name": "Bekosan"
+    "name": "Bekosan",
+    "email": "bekosan.mail@gmail.com",
+    "url": "https://github.com/Bekosantux"
   },
   "unity" : "2022.3",
   "description" : "placeholder",
@@ -11,7 +13,9 @@
     "com.vrchat.base" : "3.7.0",
     "nadena.dev.ndmf" : "1.8.0"
   },
-  "url" : "https://github.com/Bekosantux/VRCHeartRate",
+  "license" : "MIT",
+  "licenseurl" : "https://github.com/Bekosantux/vrc-heart-rate/blob/main/LICENSE.md",
+  "url" : "https://github.com/Bekosantux/vrc-heart-rate",
   "legacyFolders" : {
     "Assets\\BekoShop\\VRC_HeartRate" : "3a109ee4863e1fd48a39c0dbe9f57adb"
   }
