@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2017235094289126293}
   - component: {fileID: 3999270583344958901}
   m_Layer: 0
-  m_Name: ScriptSample
+  m_Name: SampleScript
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
