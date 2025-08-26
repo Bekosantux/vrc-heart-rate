@@ -6,7 +6,7 @@ using nadena.dev.ndmf.localization;
 
 namespace BekoShop.VRCHeartRate
 {
-    [CustomEditor(typeof(OSCHeartRateModule))]
+    [CustomEditor(typeof(VRCHeartRateModule))]
     public class OSCHeartRateModuleEditor : Editor
     {
         #if UNITY_EDITOR
@@ -14,7 +14,7 @@ namespace BekoShop.VRCHeartRate
 
         public override void OnInspectorGUI()
         {
-            var module = (OSCHeartRateModule)target;
+            var module = (VRCHeartRateModule)target;
 
             // ローカライズされたメッセージを表示
             EditorGUILayout.HelpBox(S("oscmodule.message"), MessageType.Info);

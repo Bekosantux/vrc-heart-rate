@@ -7,7 +7,7 @@ namespace BekoShop.VRCHeartRate
     /// OSC心拍計モジュールの設定を管理するコンポーネント
     /// 実行時の動作には一切関与しません（VRChatビルド時には除去されます）
     /// </summary>
-    public class OSCHeartRateModule : MonoBehaviour, IEditorOnly
+    public class VRCHeartRateModule : MonoBehaviour, IEditorOnly
     {
         [Header("Heart Rate Control Settings")]
         [SerializeField, Tooltip("心拍数手動制御機能を削除してパラメータ数を削減します")]
