@@ -42,7 +42,6 @@ namespace BekoShop.VRCHeartRate
 
         // 状態
         private bool _isValidPlacement = false;
-        private string _statusMessage = "";
         private int _lastValidationFrame = -1;
 
         // Undo時の自動再配置抑制
@@ -162,11 +161,6 @@ namespace BekoShop.VRCHeartRate
         public void SetOptionEnabled(OptionSlot slot, bool enabled) => optionEnabled[(int)slot] = enabled;
 
         public bool IsValidPlacement() => EnsureValidPlacement();
-        public string GetStatusMessage()
-        {
-            EnsureValidPlacement();
-            return _statusMessage;
-        }
 
         public bool HasAnyOptionEnabled()
         {
@@ -199,18 +193,15 @@ namespace BekoShop.VRCHeartRate
                 if (string.IsNullOrEmpty(avatarRootPath))
                 {
                     _isValidPlacement = false;
-                    _statusMessage = "アバターの内部に配置してください。\nPlease place this inside the avatar.";
                     return _isValidPlacement;
                 }
 
                 _isValidPlacement = true;
-                _statusMessage = "このスクリプトは削除しないでください。\nPlease don't delete this script.";
                 return _isValidPlacement;
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 _isValidPlacement = false;
-                _statusMessage = $"Error validating avatar root: {ex.Message}";
                 return _isValidPlacement;
             }
         }
