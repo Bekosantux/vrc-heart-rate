@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-using nadena.dev.ndmf;
+using VRC.SDKBase;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -9,7 +9,7 @@ using nadena.dev.ndmf.util;
 
 namespace BekoShop.VRCHeartRate
 {
-    public class AutoAssetPlacer : MonoBehaviour, INDMFEditorOnly
+    public class AutoAssetPlacer : MonoBehaviour, IEditorOnly
     {
 #if UNITY_EDITOR
         public enum OptionSlot
@@ -54,6 +54,8 @@ namespace BekoShop.VRCHeartRate
 
         private void OnEnable()
         {
+            if (!gameObject.scene.IsValid()) return;
+
             Undo.undoRedoPerformed -= OnUndoRedo;
             Undo.undoRedoPerformed += OnUndoRedo;
 
@@ -65,6 +67,8 @@ namespace BekoShop.VRCHeartRate
 
         private void OnDisable()
         {
+            if (!gameObject.scene.IsValid()) return;
+
             Undo.undoRedoPerformed -= OnUndoRedo;
             EditorApplication.hierarchyChanged -= OnHierarchyChanged;
         }
@@ -91,7 +95,8 @@ namespace BekoShop.VRCHeartRate
         private void OnValidate()
         {
             if (EditorApplication.isPlaying) return;
-            if (BuildPipeline.isBuildingPlayer) return; // ビルド時は実行しない
+            if (BuildPipeline.isBuildingPlayer) return;
+            if (!gameObject.scene.IsValid()) return;
 
             // 今の Undo グループ ID を記録しておく
             _validateUndoGroup = Undo.GetCurrentGroup();
