@@ -9,7 +9,7 @@ using nadena.dev.ndmf.util;
 
 namespace BekoShop.VRCHeartRate
 {
-    public class AutoAssetPlacer : MonoBehaviour, IEditorOnly
+    public class AutoModulePlacer : MonoBehaviour, IEditorOnly
     {
 #if UNITY_EDITOR
         public enum OptionSlot

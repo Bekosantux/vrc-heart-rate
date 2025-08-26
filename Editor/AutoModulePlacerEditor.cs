@@ -5,14 +5,14 @@ using static BekoShop.VRCHeartRate.LocalizationManager;
 
 namespace BekoShop.VRCHeartRate
 {
-    [CustomEditor(typeof(AutoAssetPlacer))]
+    [CustomEditor(typeof(AutoModulePlacer))]
     public class AutoAssetPlacerEditor : Editor
     {
         private bool showSettings = false;
 
         public override void OnInspectorGUI()
         {
-            var placer = (AutoAssetPlacer)target;
+            var placer = (AutoModulePlacer)target;
 
             // 配置検証
             bool isValid = placer.IsValidPlacement();
@@ -103,16 +103,16 @@ namespace BekoShop.VRCHeartRate
                     for (int i = 0; i < 8; i++)
                     {
                         EditorGUILayout.BeginHorizontal();
-                        bool newFlag = EditorGUILayout.ToggleLeft(AutoAssetPlacer.OptionLabels[i], enabled[i], GUILayout.Width(120));
+                        bool newFlag = EditorGUILayout.ToggleLeft(AutoModulePlacer.OptionLabels[i], enabled[i], GUILayout.Width(120));
                         if (newFlag != enabled[i])
                         {
-                            placer.SetOptionEnabled((AutoAssetPlacer.OptionSlot)i, newFlag);
+                            placer.SetOptionEnabled((AutoModulePlacer.OptionSlot)i, newFlag);
                         }
 
                         var newChild = (GameObject)EditorGUILayout.ObjectField(prefabs[i], typeof(GameObject), false);
                         if (newChild != prefabs[i])
                         {
-                            placer.SetOptionPrefab((AutoAssetPlacer.OptionSlot)i, newChild);
+                            placer.SetOptionPrefab((AutoModulePlacer.OptionSlot)i, newChild);
                         }
                         EditorGUILayout.EndHorizontal();
                     }
@@ -132,10 +132,10 @@ namespace BekoShop.VRCHeartRate
 
                     for (int i = 0; i < 8; i++)
                     {
-                        bool newFlag = EditorGUILayout.ToggleLeft(AutoAssetPlacer.OptionLabels[i], enabled[i]);
+                        bool newFlag = EditorGUILayout.ToggleLeft(AutoModulePlacer.OptionLabels[i], enabled[i]);
                         if (newFlag != enabled[i])
                         {
-                            placer.SetOptionEnabled((AutoAssetPlacer.OptionSlot)i, newFlag);
+                            placer.SetOptionEnabled((AutoModulePlacer.OptionSlot)i, newFlag);
                         }
                     }
 
