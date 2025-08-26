@@ -1,0 +1,21 @@
+{
+    "name": "ooo.beko.vrc-heart-rate.editor",
+    "rootNamespace": "",
+    "references": [
+        "nadena.dev.ndmf",
+        "ooo.beko.vrc-heart-rate"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

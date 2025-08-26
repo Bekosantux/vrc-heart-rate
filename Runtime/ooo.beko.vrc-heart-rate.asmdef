@@ -1,0 +1,19 @@
+{
+    "name": "ooo.beko.vrc-heart-rate",
+    "rootNamespace": "",
+    "references": [
+        "VRC.SDKBase",
+        "nadena.dev.ndmf"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "VRCSDKBase.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
