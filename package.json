@@ -8,15 +8,12 @@
     "url": "https://github.com/Bekosantux"
   },
   "unity" : "2022.3",
-  "description" : "placeholder",
+  "description" : "OSCでアバターに送信した心拍数を利用するための機能を提供します。",
   "vpmDependencies" : {
-    "com.vrchat.base" : "3.7.0",
-    "nadena.dev.ndmf" : "1.8.0"
+    "com.vrchat.base" : ">=3.7.0",
+    "nadena.dev.ndmf" : ">=1.8.0"
   },
   "license" : "MIT",
   "licenseurl" : "https://github.com/Bekosantux/vrc-heart-rate/blob/main/LICENSE.md",
-  "url" : "https://github.com/Bekosantux/vrc-heart-rate",
-  "legacyFolders" : {
-    "Assets\\BekoShop\\VRC_HeartRate" : "3a109ee4863e1fd48a39c0dbe9f57adb"
-  }
+  "url" : "https://github.com/Bekosantux/vrc-heart-rate"
 }
