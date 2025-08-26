@@ -15,6 +15,7 @@
   "oscmodule.status.inactive": "Inactive",
   "oscmodule.status.default": "Default",
   "oscmodule.status.editoronly": "EditorOnly",
+  "placer.warning.put_inside": "Please place this inside the avatar.",
   "placer.message.dont_delete": "Please do not delete this script.",
   "placer.error.no_parent_prefab": "Parent prefab is not set.",
   "placer.warning.no_option_selected": "No options selected. Please select at least one.",

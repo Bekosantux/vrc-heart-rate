@@ -15,6 +15,7 @@
   "oscmodule.status.inactive": "無効",
   "oscmodule.status.default": "Default",
   "oscmodule.status.editoronly": "EditorOnly",
+  "placer.warning.put_inside": "アバターの内部に配置してください。",
   "placer.message.dont_delete": "このスクリプトは削除しないでください。",
   "placer.error.no_parent_prefab": "親プレハブが設定されていません。",
   "placer.warning.no_option_selected": "オプションが一つも選択されていません。少なくとも1つ選択してください。",

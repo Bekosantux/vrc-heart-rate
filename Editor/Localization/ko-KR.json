@@ -15,6 +15,7 @@
   "oscmodule.status.inactive": "비활성",
   "oscmodule.status.default": "기본값",
   "oscmodule.status.editoronly": "에디터 전용",
+  "placer.warning.put_inside": "아바타 내부에 배치해주세요.",
   "placer.message.dont_delete": "이 스크립트를 삭제하지 마세요.",
   "placer.error.no_parent_prefab": "부모 프리팹이 설정되지 않았습니다.",
   "placer.warning.no_option_selected": "선택된 옵션이 없습니다. 하나 이상 선택해주세요.",

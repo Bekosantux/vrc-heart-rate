@@ -15,6 +15,7 @@
   "oscmodule.status.inactive": "未激活",
   "oscmodule.status.default": "默认",
   "oscmodule.status.editoronly": "仅编辑器",
+  "placer.warning.put_inside": "请将此放置在头像内部。",
   "placer.message.dont_delete": "请不要删除此脚本。",
   "placer.error.no_parent_prefab": "未设置父预制体。",
   "placer.warning.no_option_selected": "未选择任何选项。请至少选择一项。",

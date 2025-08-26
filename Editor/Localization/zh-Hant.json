@@ -15,6 +15,7 @@
   "oscmodule.status.inactive": "未啟用",
   "oscmodule.status.default": "預設",
   "oscmodule.status.editoronly": "僅編輯器",
+  "placer.warning.put_inside": "請將此放置在虛擬人偶內部。",
   "placer.message.dont_delete": "請不要刪除此腳本。",
   "placer.error.no_parent_prefab": "未設定父預製物。",
   "placer.warning.no_option_selected": "未選擇任何選項。請至少選擇一項。",
