@@ -19,7 +19,6 @@ namespace BekoShop.VRCHeartRate
 
             if (!isValid)
             {
-                // GetStatusMessageはコンポーネント側で生成されるため、そのまま表示
                 EditorGUILayout.HelpBox(S("placer.warning.put_inside"), MessageType.Warning);
                 EditorGUILayout.Space();
             }

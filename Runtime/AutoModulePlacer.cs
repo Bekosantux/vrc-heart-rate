@@ -214,7 +214,7 @@ namespace BekoShop.VRCHeartRate
             Transform avatarRoot = GetAvatarRootTransform();
             if (avatarRoot == null) 
             {
-                Debug.LogWarning("AutoAssetPlacer: Avatar root not found. Script must be placed inside an avatar hierarchy.", this);
+                Debug.LogWarning("AutoModulePlacer: Avatar root not found. Script must be placed inside an avatar hierarchy.", this);
                 return; // アバタールートが見つからない場合は処理を中止
             }
 
@@ -245,14 +245,14 @@ namespace BekoShop.VRCHeartRate
                         isNewParent = true;
 
                         // ログのContextを生成されたオブジェクト自身に変更
-                        Debug.Log($"AutoAssetPlacer: Created new parent container prefab '{parentGO.name}'.", parentGO);
+                        Debug.Log($"AutoModulePlacer: Created new parent container prefab '{parentGO.name}'.", parentGO);
                     }
                 }
             }
             else
             {
                 // 既存の親プレハブを使用する場合のログ（Contextを既存オブジェクトに変更）
-                Debug.Log($"AutoAssetPlacer: Using existing parent container prefab '{parentNode.name}'.", parentNode.gameObject);
+                Debug.Log($"AutoModulePlacer: Using existing parent container prefab '{parentNode.name}'.", parentNode.gameObject);
             }
 
             // 親が存在するなら子の不足分を配置
@@ -297,12 +297,12 @@ namespace BekoShop.VRCHeartRate
                 if (createdCount > 0)
                 {
                     string parentType = isNewParent ? "new" : "existing";
-                    Debug.Log($"AutoAssetPlacer: Added {createdCount} option prefab(s) to {parentType} parent container.", parentNode.gameObject);
+                    Debug.Log($"AutoModulePlacer: Added {createdCount} option prefab(s) to {parentType} parent container.", parentNode.gameObject);
 
                     // 各子オブジェクトにも個別ログ（Contextを各子オブジェクトに設定）
                     foreach (var child in createdChildren)
                     {
-                        Debug.Log($"AutoAssetPlacer: Added option prefab '{child.name}'.", child);
+                        Debug.Log($"AutoModulePlacer: Added option prefab '{child.name}'.", child);
                     }
                 }
             }

@@ -9,6 +9,7 @@ namespace BekoShop.VRCHeartRate
     /// </summary>
     public class VRCHeartRateModule : MonoBehaviour, IEditorOnly
     {
+#if UNITY_EDITOR
         [Header("Heart Rate Control Settings")]
         [SerializeField, Tooltip("心拍数手動制御機能を削除してパラメータ数を削減します")]
         private bool removeManualControl = false;
@@ -32,10 +33,8 @@ namespace BekoShop.VRCHeartRate
                 if (removeManualControl != value)
                 {
                     removeManualControl = value;
-#if UNITY_EDITOR
                     // チェックボックスの状態変更時のみ処理を実行
                     UpdateGameObjectStates();
-#endif
                 }
             }
         }
@@ -58,7 +57,6 @@ namespace BekoShop.VRCHeartRate
             set => additionalSettingsObject = value;
         }
 
-#if UNITY_EDITOR
         /// <summary>
         /// チェックボックスの状態に応じてゲームオブジェクトの有効状態を更新
         /// </summary>

@@ -16,7 +16,6 @@ namespace BekoShop.VRCHeartRate
         {
             var module = (VRCHeartRateModule)target;
 
-            // ローカライズされたメッセージを表示
             EditorGUILayout.HelpBox(S("oscmodule.message"), MessageType.Info);
 
             EditorGUILayout.Space();
