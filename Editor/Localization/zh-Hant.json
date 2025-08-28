@@ -1,5 +1,6 @@
 {
   "oscmodule.message": "此預製物用於啟用透過 OSC 傳送心率以供資產使用的功能，單獨存在並無意義。\n若不使用 OSC 心率功能，可以將其刪除。",
+  "oscmodule_manual.message": "此預製物用於啟用透過手動控制心率以供資產使用的功能，單獨存在並無意義。\n若不使用心率相關資產，可以將其刪除。",
   "oscmodule.checkbox.remove_manual": "移除手動心率控制（減少參數數量）",
   "oscmodule.foldout.objects": "物件引用設定",
   "oscmodule.tooltip.manual": "預設參數物件",

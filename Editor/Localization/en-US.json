@@ -1,5 +1,6 @@
 {
   "oscmodule.message": "This prefab enables assets that use heart rate transmitted via OSC and has no meaning on its own.\nIf you do not use the OSC heart rate feature, you can safely delete this prefab.",
+  "oscmodule_manual.message": "This prefab enables assets that use manually controlled heart rate and has no meaning on its own.\nIf you do not use heart rate related assets, you can safely delete this prefab.",
   "oscmodule.checkbox.remove_manual": "Remove manual heart rate control (reduce parameters)",
   "oscmodule.foldout.objects": "Object Reference Settings",
   "oscmodule.tooltip.manual": "Default Parameter Object",

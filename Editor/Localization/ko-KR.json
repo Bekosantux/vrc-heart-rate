@@ -1,5 +1,6 @@
 {
   "oscmodule.message": "이 프리팹은 OSC로 전송된 심박수를 사용하는 애셋을 동작시키기 위한 것으로, 단독으로는 의미가 없습니다.\nOSC 심박수 기능을 사용하지 않는 경우 이 프리팹을 삭제해도 됩니다.",
+  "oscmodule_manual.message": "이 프리팹은 심박수를 수동으로 제어하여 사용하는 애셋을 동작시키기 위한 것으로, 단독으로는 의미가 없습니다.\n심박수 관련 애셋을 사용하지 않는 경우 이 프리팹을 삭제해도 됩니다.",
   "oscmodule.checkbox.remove_manual": "수동 심박수 제어 기능 제거 (파라미터 수 감소)",
   "oscmodule.foldout.objects": "오브젝트 참조 설정",
   "oscmodule.tooltip.manual": "기본 파라미터 오브젝트",
