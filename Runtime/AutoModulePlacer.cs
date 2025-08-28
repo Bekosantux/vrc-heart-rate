@@ -113,7 +113,7 @@ namespace BekoShop.VRCHeartRate
             if (!EnsureValidPlacement()) return;
             if (suppressAutoPlacement) return;
             if (EditorApplication.isPlaying) return;
-            if (BuildPipeline.isBuildingPlayer) return; // ビルド時は実行しない
+            if (BuildPipeline.isBuildingPlayer) return;
 
             PlaceParentAndOptionsIfNeeded();
         }
@@ -127,7 +127,7 @@ namespace BekoShop.VRCHeartRate
             // オブジェクトが消えていたら何もしない
             if (this == null) return;
             if (suppressAutoPlacement) return;
-            if (BuildPipeline.isBuildingPlayer) return; // ビルド時は実行しない
+            if (BuildPipeline.isBuildingPlayer) return;
 
             // 新しいグループを開く
             Undo.IncrementCurrentGroup();
@@ -244,15 +244,9 @@ namespace BekoShop.VRCHeartRate
                         parentNode = parentGO.transform;
                         isNewParent = true;
 
-                        // ログのContextを生成されたオブジェクト自身に変更
                         Debug.Log($"AutoModulePlacer: Created new parent container prefab '{parentGO.name}'.", parentGO);
                     }
                 }
-            }
-            else
-            {
-                // 既存の親プレハブを使用する場合のログ（Contextを既存オブジェクトに変更）
-                Debug.Log($"AutoModulePlacer: Using existing parent container prefab '{parentNode.name}'.", parentNode.gameObject);
             }
 
             // 親が存在するなら子の不足分を配置
