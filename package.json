@@ -1,7 +1,7 @@
 {
   "name": "ooo.beko.vrc-heart-rate",
   "displayName": "VRC Heart Rate",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "author": {
     "name": "Bekosan",
     "email": "bekosan.mail@gmail.com",
@@ -11,7 +11,8 @@
   "description": "OSC\u3067\u30a2\u30d0\u30bf\u30fc\u306b\u9001\u4fe1\u3057\u305f\u5fc3\u62cd\u6570\u3092\u5229\u7528\u3059\u308b\u305f\u3081\u306e\u6a5f\u80fd\u3092\u63d0\u4f9b\u3057\u307e\u3059\u3002",
   "vpmDependencies": {
     "com.vrchat.base": ">=3.7.0",
-    "nadena.dev.ndmf": ">=1.8.0"
+    "nadena.dev.ndmf": ">=1.8.0",
+    "nadena.dev.modular-avatar": ">=1.10.0"
   },
   "license": "MIT",
   "licenseurl": "https://github.com/Bekosantux/vrc-heart-rate/blob/main/LICENSE.md",
