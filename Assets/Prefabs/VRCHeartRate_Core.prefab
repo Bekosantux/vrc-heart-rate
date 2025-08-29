@@ -394,7 +394,7 @@ MonoBehaviour:
     saved: 0
     hasExplicitDefaultValue: 1
     m_overrideAnimatorDefaults: 0
-  - nameOrPrefix: VCRHR/Blend
+  - nameOrPrefix: VRCHR/Blend
     remapTo: 
     internalParameter: 0
     isPrefix: 0
