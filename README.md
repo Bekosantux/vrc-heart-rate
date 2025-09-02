@@ -1,8 +1,16 @@
 # VRC Heart Rate Project
 
 ## これは何？
-OSCでアバターに送信された心拍数を、簡単に利用できるようにする Modular Avatar プレハブと、プレハブ自動配置機能を提供します。  
-心拍数を利用するギミックが複数あっても、重複せずに無駄のないようにプレハブを配置できます。
+VRChatのアバターギミックで心拍数に関連する機能をひとまとめにし、連携させることを目的としたシステムです。  
+
+通常、OSCで送信された心拍数をアバターで使用するには、パラメーターの変換など面倒な作業が必要です。  
+このシステムは、その役割の中枢を担うことで、ギミックの利用者にも、開発者にも簡単な使用感を提供します。
+
+なお、心拍計をお持ちでなくても、心拍数を手動調整できるマニュアル操作版も用意しています。
+
+## どのように動く？
+スクリプトを設定したゲームオブジェクトをVRChatアバター内に配置すると、 Modular Avatarで設定されたコア機能のプレハブが自動的に同階層に配置されます。  
+このプレハブは心拍数に関する機能を担当し、VRCメニューやパラメーター等を提供します。これはアバターの中で1つだけであり、処理が重複することはありません。  
 
 ## どのように使う？
 利用者側で気にすべきことは一切ありません。ただ、開発者が用意したプレハブをアバター内にドラッグ・アンド・ドロップするだけです！
@@ -15,14 +23,14 @@ OSCでアバターに送信された心拍数を、簡単に利用できるよ�
 ### 開発者向け情報
 すでにパラメーターは準備してあるので、すぐに心拍数を利用したギミックの開発に取りかかれます。  
 詳しくは以下のリンクをご参照ください。  
-https://bekosantux.github.io/ShopDoc/category/vrc-heart-rate/
+https://shop.beko.ooo/category/vrc-heart-rate/
 
 ## 前提アセット
 このアセットの利用には、  
-- VRC SDK Base  
+- VRChat Avatar SDK3
+- Modular Avatar
 - Non-Destructive Modular Framework (NDMF)
-
-が必須です。あらかじめインストールしてください。
+が必須です。
 
 ## インストール
 VPMよりインストールできます。  
@@ -31,4 +39,4 @@ https://bekosantux.github.io/vpm-repos/
 または、GithubのReleaseページから unitypackage をダウンロード可能です。
 
 ## 更新履歴
-https://bekosantux.github.io/ShopDoc/VRCHeartRate/change-log/
+https://shop.beko.ooo/vrc-heart-rate/change-log/
