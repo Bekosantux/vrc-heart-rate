@@ -10,12 +10,27 @@ namespace BekoShop.VRCHeartRate
     {
         private bool showSettings = false;
 
+        // 直前の isValid を保持（初期値は未定義扱い）
+        private bool? _prevIsValid;
+
+        private void OnEnable()
+        {
+            _prevIsValid = null;
+        }
+
         public override void OnInspectorGUI()
         {
             var placer = (AutoModulePlacer)target;
 
             // 配置検証
             bool isValid = placer.IsValidPlacement();
+
+            // false -> true に切り替わった瞬間のみ実行
+            if (_prevIsValid.HasValue && !_prevIsValid.Value && isValid)
+            {
+                _prevIsValid = isValid;
+                placer.ValidateAndProcess();
+            }
 
             if (!isValid)
             {
@@ -146,7 +161,6 @@ namespace BekoShop.VRCHeartRate
 
                 EditorGUILayout.Space();
 
-                // 強制実行
                 EditorGUI.BeginDisabledGroup(!isValid);
                 if (GUILayout.Button(S("placer.button.force_check")))
                 {
@@ -158,6 +172,8 @@ namespace BekoShop.VRCHeartRate
             }
 
             ShowLanguageUI();
+
+            _prevIsValid = isValid;
         }
     }
 }

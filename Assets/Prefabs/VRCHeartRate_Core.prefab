@@ -415,7 +415,7 @@ GameObject:
   - component: {fileID: 2961235878426700290}
   - component: {fileID: 1567669741152401887}
   m_Layer: 0
-  m_Name: HeartRateCore
+  m_Name: VRCHeartRate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
