@@ -25,6 +25,8 @@ namespace BekoShop.VRCHeartRate
             IKPose = 7
         }
 
+        private const int OptionCount = 8;
+
         public static readonly string[] OptionLabels = new[]
         {
             "FX","Additive","Action","Gesture","Base","Sitting","TPose","IKPose"
@@ -35,26 +37,29 @@ namespace BekoShop.VRCHeartRate
         private GameObject parentContainerPrefab;
 
         [SerializeField, Tooltip("各オプションに対応する子プレハブ")]
-        private GameObject[] optionPrefabs = new GameObject[8];
+        private GameObject[] optionPrefabs = new GameObject[OptionCount];
 
         [Header("Options")]
         [SerializeField, Tooltip("各オプションを配置するかどうか")]
-        private bool[] optionEnabled = new bool[8];
+        private bool[] optionEnabled = new bool[OptionCount];
 
         // 状態
-        private bool _isValidPlacement = false;
+        private bool _isValidPlacement;
         private int _lastValidationFrame = -1;
 
-        // Undo時の自動再配置抑制
+        // Undo時の自動再配置抑制（静的：他インスタンスとも共有）
         private static bool suppressAutoPlacement = false;
 
+        // 遅延処理制御
         private bool _placementScheduled;
-        // OnValidate が呼ばれた時点の Undo グループ
+        // OnValidate 時点の Undo グループ
         private int _validateUndoGroup = -1;
 
         private void OnEnable()
         {
             if (!gameObject.scene.IsValid()) return;
+
+            EnsureArrays();
 
             Undo.undoRedoPerformed -= OnUndoRedo;
             Undo.undoRedoPerformed += OnUndoRedo;
@@ -69,21 +74,19 @@ namespace BekoShop.VRCHeartRate
         {
             if (!gameObject.scene.IsValid()) return;
 
+            CancelScheduledProcess();
+
             Undo.undoRedoPerformed -= OnUndoRedo;
             EditorApplication.hierarchyChanged -= OnHierarchyChanged;
         }
 
         private void OnUndoRedo()
         {
-            // 予約していた遅延呼び出しをキャンセル
-            if (_placementScheduled)
-            {
-                EditorApplication.delayCall -= DelayedValidateAndProcess;
-                _placementScheduled = false;
-            }
+            CancelScheduledProcess();
 
             suppressAutoPlacement = true;
-            ValidateAndProcess();        // ここでは再配置しない
+            // 配置の妥当性だけは更新（再配置は行わない）
+            EnsureValidPlacement();
             suppressAutoPlacement = false;
         }
 
@@ -94,27 +97,23 @@ namespace BekoShop.VRCHeartRate
 
         private void OnValidate()
         {
-            if (EditorApplication.isPlaying) return;
-            if (BuildPipeline.isBuildingPlayer) return;
+            if (!CanRunEditorAutomation()) return;
             if (!gameObject.scene.IsValid()) return;
 
-            // 今の Undo グループ ID を記録しておく
+            EnsureArrays();
+
+            // 今の Undo グループ ID を記録
             _validateUndoGroup = Undo.GetCurrentGroup();
 
             // 既に予約済みなら重複予約しない
-            if (!_placementScheduled)
-            {
-                _placementScheduled = true;
-                EditorApplication.delayCall += DelayedValidateAndProcess;
-            }
+            ScheduleDelayedValidateAndProcess();
         }
 
         public void ValidateAndProcess()
         {
             if (!EnsureValidPlacement()) return;
             if (suppressAutoPlacement) return;
-            if (EditorApplication.isPlaying) return;
-            if (BuildPipeline.isBuildingPlayer) return;
+            if (!CanRunEditorAutomation()) return;
 
             PlaceParentAndOptionsIfNeeded();
         }
@@ -134,12 +133,10 @@ namespace BekoShop.VRCHeartRate
             Undo.IncrementCurrentGroup();
             int myGroup = Undo.GetCurrentGroup();
 
-            // ここで階層を書き換える
+            // 階層を書き換える
             PlaceParentAndOptionsIfNeeded();
 
-            /* 重要！
-               OnValidate 時に取得したグループと結合して
-               「ユーザ操作＋自動配置」を１つの操作にまとめる */
+            // OnValidate 時に取得したグループと結合して1操作にまとめる
             if (_validateUndoGroup >= 0)
             {
                 Undo.CollapseUndoOperations(_validateUndoGroup);
@@ -156,10 +153,18 @@ namespace BekoShop.VRCHeartRate
         public void SetParentContainerPrefab(GameObject prefab) => parentContainerPrefab = prefab;
 
         public GameObject[] GetOptionPrefabs() => optionPrefabs;
-        public void SetOptionPrefab(OptionSlot slot, GameObject prefab) => optionPrefabs[(int)slot] = prefab;
+        public void SetOptionPrefab(OptionSlot slot, GameObject prefab)
+        {
+            EnsureArrays();
+            optionPrefabs[(int)slot] = prefab;
+        }
 
         public bool[] GetOptionEnabled() => optionEnabled;
-        public void SetOptionEnabled(OptionSlot slot, bool enabled) => optionEnabled[(int)slot] = enabled;
+        public void SetOptionEnabled(OptionSlot slot, bool enabled)
+        {
+            EnsureArrays();
+            optionEnabled[(int)slot] = enabled;
+        }
 
         public bool IsValidPlacement() => EnsureValidPlacement();
 
@@ -175,9 +180,10 @@ namespace BekoShop.VRCHeartRate
 
         public IEnumerable<int> EnabledSlots()
         {
-            for (int i = 0; i < 8; i++)
+            EnsureArrays();
+            for (int i = 0; i < OptionCount; i++)
             {
-                if (optionEnabled != null && i < optionEnabled.Length && optionEnabled[i]) yield return i;
+                if (optionEnabled[i]) yield return i;
             }
         }
 
@@ -191,20 +197,13 @@ namespace BekoShop.VRCHeartRate
             try
             {
                 string avatarRootPath = this.AvatarRootPath();
-                if (string.IsNullOrEmpty(avatarRootPath))
-                {
-                    _isValidPlacement = false;
-                    return _isValidPlacement;
-                }
-
-                _isValidPlacement = true;
-                return _isValidPlacement;
+                _isValidPlacement = !string.IsNullOrEmpty(avatarRootPath);
             }
-            catch (System.Exception)
+            catch
             {
                 _isValidPlacement = false;
-                return _isValidPlacement;
             }
+            return _isValidPlacement;
         }
 
         private void PlaceParentAndOptionsIfNeeded()
@@ -213,10 +212,10 @@ namespace BekoShop.VRCHeartRate
 
             // アバタールートの取得
             Transform avatarRoot = GetAvatarRootTransform();
-            if (avatarRoot == null) 
+            if (avatarRoot == null)
             {
                 Debug.LogWarning("AutoModulePlacer: Avatar root not found. Script must be placed inside an avatar hierarchy.", this);
-                return; // アバタールートが見つからない場合は処理を中止
+                return;
             }
 
             // 既存の親プレハブをアバタールートから GUID で検索（幅優先探索）
@@ -226,7 +225,7 @@ namespace BekoShop.VRCHeartRate
             Undo.IncrementCurrentGroup();
             int group = Undo.GetCurrentGroup();
 
-            bool isNewParent = false;
+            bool createdParent = false;
 
             // 親が存在しない場合のみ新規生成（スクリプトと同階層に配置）
             if (parentNode == null)
@@ -234,7 +233,7 @@ namespace BekoShop.VRCHeartRate
                 Transform siblingsParent = transform.parent;
                 if (siblingsParent != null)
                 {
-                    GameObject parentGO = PrefabUtility.InstantiatePrefab(parentContainerPrefab) as GameObject;
+                    var parentGO = PrefabUtility.InstantiatePrefab(parentContainerPrefab) as GameObject;
                     if (parentGO != null)
                     {
                         parentGO.transform.SetParent(siblingsParent);
@@ -243,7 +242,7 @@ namespace BekoShop.VRCHeartRate
                         parentGO.transform.localScale = Vector3.one;
                         Undo.RegisterCreatedObjectUndo(parentGO, "Auto Place Parent Container");
                         parentNode = parentGO.transform;
-                        isNewParent = true;
+                        createdParent = true;
 
                         Debug.Log($"AutoModulePlacer: Created new parent container prefab '{parentGO.name}'.", parentGO);
                     }
@@ -261,21 +260,9 @@ namespace BekoShop.VRCHeartRate
                     var childPrefab = optionPrefabs[slot];
                     if (childPrefab == null) continue;
 
-                    // 親の直下に同名オブジェクトが存在するか確認
-                    bool exists = false;
-                    for (int i = 0; i < parentNode.childCount; i++)
+                    if (!ChildExistsByName(parentNode, childPrefab.name))
                     {
-                        var child = parentNode.GetChild(i);
-                        if (child.name == childPrefab.name)
-                        {
-                            exists = true;
-                            break;
-                        }
-                    }
-
-                    if (!exists)
-                    {
-                        GameObject childGO = PrefabUtility.InstantiatePrefab(childPrefab) as GameObject;
+                        var childGO = PrefabUtility.InstantiatePrefab(childPrefab) as GameObject;
                         if (childGO != null)
                         {
                             childGO.transform.SetParent(parentNode);
@@ -291,10 +278,9 @@ namespace BekoShop.VRCHeartRate
 
                 if (createdCount > 0)
                 {
-                    string parentType = isNewParent ? "new" : "existing";
+                    string parentType = createdParent ? "new" : "existing";
                     Debug.Log($"AutoModulePlacer: Added {createdCount} option prefab(s) to {parentType} parent container.", parentNode.gameObject);
 
-                    // 各子オブジェクトにも個別ログ（Contextを各子オブジェクトに設定）
                     foreach (var child in createdChildren)
                     {
                         Debug.Log($"AutoModulePlacer: Added option prefab '{child.name}'.", child);
@@ -307,32 +293,24 @@ namespace BekoShop.VRCHeartRate
 
         /// <summary>
         /// AvatarRootPath() を使ってアバタールートのTransformを取得
-        /// this.AvatarRootPath() はスクリプトプレハブのアバタールートからの相対パスを返すため、
-        /// 実際のアバタールートオブジェクトを見つけて返す
         /// </summary>
         private Transform GetAvatarRootTransform()
         {
             try
             {
                 string avatarRootPath = this.AvatarRootPath();
-                if (string.IsNullOrEmpty(avatarRootPath))
-                    return null;
+                if (string.IsNullOrEmpty(avatarRootPath)) return null;
 
-                // スクリプトプレハブから親を辿ってアバタールートを見つける
                 Transform current = transform;
 
-                // AvatarRootPath() で取得したパスの階層数分だけ親を辿る
-                // パスが "/" で始まる場合は除去
                 if (avatarRootPath.StartsWith("/"))
                     avatarRootPath = avatarRootPath.Substring(1);
 
                 string[] pathSegments = avatarRootPath.Split('/');
-
                 // パスの階層数分だけ親を辿る（自分自身を含む）
                 for (int i = 0; i < pathSegments.Length; i++)
                 {
-                    if (current.parent == null)
-                        return null; // 親がない場合は失敗
+                    if (current == null || current.parent == null) return null;
                     current = current.parent;
                 }
 
@@ -366,23 +344,18 @@ namespace BekoShop.VRCHeartRate
             {
                 var current = queue.Dequeue();
 
-                // currentがプレハブインスタンスのルートかチェック
-                var prefabRoot = PrefabUtility.GetNearestPrefabInstanceRoot(current.gameObject);
-                if (prefabRoot != null && prefabRoot == current.gameObject)
+                // current がプレハブインスタンスのルートかチェック
+                var instanceRoot = PrefabUtility.GetNearestPrefabInstanceRoot(current.gameObject);
+                if (instanceRoot != null && instanceRoot == current.gameObject)
                 {
-                    // プレハブアセットのGUIDを取得
                     string path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(current.gameObject);
                     if (!string.IsNullOrEmpty(path))
                     {
                         string guid = AssetDatabase.AssetPathToGUID(path);
-                        if (guid == wantedGuid)
-                        {
-                            return current;
-                        }
+                        if (guid == wantedGuid) return current;
                     }
                 }
 
-                // 子要素をキューに追加
                 for (int i = 0; i < current.childCount; i++)
                 {
                     queue.Enqueue(current.GetChild(i));
@@ -390,6 +363,61 @@ namespace BekoShop.VRCHeartRate
             }
 
             return null;
+        }
+
+        private static bool ChildExistsByName(Transform parent, string childName)
+        {
+            for (int i = 0; i < parent.childCount; i++)
+            {
+                if (parent.GetChild(i).name == childName) return true;
+            }
+            return false;
+        }
+
+        private bool CanRunEditorAutomation()
+        {
+            if (EditorApplication.isPlaying) return false;
+            if (BuildPipeline.isBuildingPlayer) return false;
+            return true;
+        }
+
+        private void ScheduleDelayedValidateAndProcess()
+        {
+            if (_placementScheduled) return;
+            _placementScheduled = true;
+            EditorApplication.delayCall += DelayedValidateAndProcess;
+        }
+
+        private void CancelScheduledProcess()
+        {
+            if (!_placementScheduled) return;
+            EditorApplication.delayCall -= DelayedValidateAndProcess;
+            _placementScheduled = false;
+        }
+
+        private void EnsureArrays()
+        {
+            if (optionPrefabs == null || optionPrefabs.Length != OptionCount)
+            {
+                var old = optionPrefabs;
+                optionPrefabs = new GameObject[OptionCount];
+                if (old != null)
+                {
+                    int copy = Mathf.Min(OptionCount, old.Length);
+                    for (int i = 0; i < copy; i++) optionPrefabs[i] = old[i];
+                }
+            }
+
+            if (optionEnabled == null || optionEnabled.Length != OptionCount)
+            {
+                var old = optionEnabled;
+                optionEnabled = new bool[OptionCount];
+                if (old != null)
+                {
+                    int copy = Mathf.Min(OptionCount, old.Length);
+                    for (int i = 0; i < copy; i++) optionEnabled[i] = old[i];
+                }
+            }
         }
 #endif
     }
