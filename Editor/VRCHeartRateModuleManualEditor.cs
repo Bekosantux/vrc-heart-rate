@@ -10,7 +10,6 @@ namespace BekoShop.VRCHeartRate
     public class OSCHeartRateModuleManualEditor : Editor
     {
         #if UNITY_EDITOR
-        private bool showGameObjectSettings = false;
 
         public override void OnInspectorGUI()
         {
