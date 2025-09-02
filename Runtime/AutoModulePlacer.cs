@@ -9,6 +9,7 @@ using nadena.dev.ndmf.util;
 
 namespace BekoShop.VRCHeartRate
 {
+    [HelpURL("https://bekosantux.github.io/shop-document/category/vrc-heart-rate/")]
     public class AutoModulePlacer : MonoBehaviour, IEditorOnly
     {
 #if UNITY_EDITOR
