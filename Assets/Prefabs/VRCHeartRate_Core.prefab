@@ -105,7 +105,7 @@ MonoBehaviour:
     saved: 0
     hasExplicitDefaultValue: 1
     m_overrideAnimatorDefaults: 0
-  - nameOrPrefix: VCRHR/Blend
+  - nameOrPrefix: VRCHR/Blend
     remapTo: 
     internalParameter: 0
     isPrefix: 0
@@ -351,7 +351,7 @@ MonoBehaviour:
     syncType: 2
     localOnly: 0
     defaultValue: 0
-    saved: 0
+    saved: 1
     hasExplicitDefaultValue: 1
     m_overrideAnimatorDefaults: 0
   - nameOrPrefix: VRCHR/ForceManualControl_Bool
@@ -361,7 +361,7 @@ MonoBehaviour:
     syncType: 3
     localOnly: 0
     defaultValue: 0
-    saved: 0
+    saved: 1
     hasExplicitDefaultValue: 1
     m_overrideAnimatorDefaults: 0
   - nameOrPrefix: VRCHR/Local_FullHR_Float
