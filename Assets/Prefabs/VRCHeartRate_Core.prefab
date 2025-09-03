@@ -240,7 +240,7 @@ GameObject:
   - component: {fileID: 7331786389951521102}
   - component: {fileID: 1946790789829063826}
   m_Layer: 0
-  m_Name: VRCMenu
+  m_Name: VRCMenu_VRCHeartRate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
