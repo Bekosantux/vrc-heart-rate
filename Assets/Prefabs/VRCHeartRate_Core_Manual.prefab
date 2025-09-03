@@ -158,8 +158,8 @@ MonoBehaviour:
     isPrefix: 0
     syncType: 2
     localOnly: 0
-    defaultValue: 0
-    saved: 0
+    defaultValue: 0.13
+    saved: 1
     hasExplicitDefaultValue: 1
     m_overrideAnimatorDefaults: 0
   - nameOrPrefix: VRCHR/Local_FullHR_Float
