@@ -4,28 +4,28 @@ using VRC.SDKBase;
 namespace BekoShop.VRCHeartRate
 {
     /// <summary>
-    /// OSCS”Œvƒ‚ƒWƒ…[ƒ‹‚Ìİ’è‚ğŠÇ—‚·‚éƒRƒ“ƒ|[ƒlƒ“ƒg
-    /// Às‚Ì“®ì‚É‚ÍˆêØŠÖ—^‚µ‚Ü‚¹‚ñiVRChatƒrƒ‹ƒh‚É‚Íœ‹‚³‚ê‚Ü‚·j
+    /// OSCå¿ƒæ‹è¨ˆãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®è¨­å®šã‚’ç®¡ç†ã™ã‚‹ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
+    /// å®Ÿè¡Œæ™‚ã®å‹•ä½œã«ã¯ä¸€åˆ‡é–¢ä¸ã—ã¾ã›ã‚“ï¼ˆVRChatãƒ“ãƒ«ãƒ‰æ™‚ã«ã¯é™¤å»ã•ã‚Œã¾ã™ï¼‰
     /// </summary>
     [HelpURL("https://bekosantux.github.io/shop-document/category/vrc-heart-rate/")]
     public class VRCHeartRateModule : MonoBehaviour, IEditorOnly
     {
 #if UNITY_EDITOR
         [Header("Heart Rate Control Settings")]
-        [SerializeField, Tooltip("S””è“®§Œä‹@”\‚ğíœ‚µ‚Äƒpƒ‰ƒ[ƒ^”‚ğíŒ¸‚µ‚Ü‚·")]
+        [SerializeField, Tooltip("å¿ƒæ‹æ•°æ‰‹å‹•åˆ¶å¾¡æ©Ÿèƒ½ã‚’å‰Šé™¤ã—ã¦ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿æ•°ã‚’å‰Šæ¸›ã—ã¾ã™")]
         private bool removeManualControl = false;
 
         [Header("GameObject References")]
-        [SerializeField, Tooltip("ƒfƒtƒHƒ‹ƒgƒpƒ‰ƒ[ƒ^—pƒQ[ƒ€ƒIƒuƒWƒFƒNƒg")]
+        [SerializeField, Tooltip("ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ç”¨ã‚²ãƒ¼ãƒ ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ")]
         private GameObject manualControlObject;
 
-        [SerializeField, Tooltip("íŒ¸”Åƒpƒ‰ƒ[ƒ^—pƒQ[ƒ€ƒIƒuƒWƒFƒNƒg")]
+        [SerializeField, Tooltip("å‰Šæ¸›ç‰ˆãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ç”¨ã‚²ãƒ¼ãƒ ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ")]
         private GameObject autoControlObject;
 
-        [SerializeField, Tooltip("ƒƒjƒ…[ƒIƒuƒWƒFƒNƒg")]
+        [SerializeField, Tooltip("ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ")]
         private GameObject additionalSettingsObject;
 
-        // ŠO•”ƒAƒNƒZƒX—pƒvƒƒpƒeƒBiEditorê—pj
+        // å¤–éƒ¨ã‚¢ã‚¯ã‚»ã‚¹ç”¨ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ï¼ˆEditorå°‚ç”¨ï¼‰
         public bool RemoveManualControl
         {
             get => removeManualControl;
@@ -34,7 +34,7 @@ namespace BekoShop.VRCHeartRate
                 if (removeManualControl != value)
                 {
                     removeManualControl = value;
-                    // ƒ`ƒFƒbƒNƒ{ƒbƒNƒX‚Ìó‘Ô•ÏX‚Ì‚İˆ—‚ğÀs
+                    // ãƒã‚§ãƒƒã‚¯ãƒœãƒƒã‚¯ã‚¹ã®çŠ¶æ…‹å¤‰æ›´æ™‚ã®ã¿å‡¦ç†ã‚’å®Ÿè¡Œ
                     UpdateGameObjectStates();
                 }
             }
@@ -59,20 +59,20 @@ namespace BekoShop.VRCHeartRate
         }
 
         /// <summary>
-        /// ƒ`ƒFƒbƒNƒ{ƒbƒNƒX‚Ìó‘Ô‚É‰‚¶‚ÄƒQ[ƒ€ƒIƒuƒWƒFƒNƒg‚Ì—LŒøó‘Ô‚ğXV
+        /// ãƒã‚§ãƒƒã‚¯ãƒœãƒƒã‚¯ã‚¹ã®çŠ¶æ…‹ã«å¿œã˜ã¦ã‚²ãƒ¼ãƒ ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æœ‰åŠ¹çŠ¶æ…‹ã‚’æ›´æ–°
         /// </summary>
         public void UpdateGameObjectStates()
         {
             if (removeManualControl)
             {
-                // è“®§Œä‚ğíœ‚·‚éê‡
+                // æ‰‹å‹•åˆ¶å¾¡ã‚’å‰Šé™¤ã™ã‚‹å ´åˆ
                 SetGameObjectState(manualControlObject, false, true);  // Disable + EditorOnly
                 SetGameObjectState(autoControlObject, true, false);    // Enable + Default
                 SetGameObjectState(additionalSettingsObject, false, true); // Disable + EditorOnly
             }
             else
             {
-                // è“®§Œä‚ğˆÛ‚·‚éê‡
+                // æ‰‹å‹•åˆ¶å¾¡ã‚’ç¶­æŒã™ã‚‹å ´åˆ
                 SetGameObjectState(manualControlObject, true, false);  // Enable + Default
                 SetGameObjectState(autoControlObject, false, true);   // Disable + EditorOnly
                 SetGameObjectState(additionalSettingsObject, true, false); // Enable + Default
@@ -80,7 +80,7 @@ namespace BekoShop.VRCHeartRate
         }
 
         /// <summary>
-        /// ƒQ[ƒ€ƒIƒuƒWƒFƒNƒg‚Ì—LŒøó‘Ô‚Æƒ^ƒO‚ğİ’è
+        /// ã‚²ãƒ¼ãƒ ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æœ‰åŠ¹çŠ¶æ…‹ã¨ã‚¿ã‚°ã‚’è¨­å®š
         /// </summary>
         private void SetGameObjectState(GameObject target, bool isActive, bool isEditorOnly)
         {
@@ -94,7 +94,7 @@ namespace BekoShop.VRCHeartRate
             }
             else
             {
-                // ƒfƒtƒHƒ‹ƒgƒ^ƒO‚É–ß‚·
+                // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚¿ã‚°ã«æˆ»ã™
                 target.tag = "Untagged";
             }
         }

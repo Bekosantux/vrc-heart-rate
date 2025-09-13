@@ -4,8 +4,8 @@ using VRC.SDKBase;
 namespace BekoShop.VRCHeartRate
 {
     /// <summary>
-    /// OSCS”Œvƒ‚ƒWƒ…[ƒ‹‚Ìİ’è‚ğŠÇ—‚·‚éƒRƒ“ƒ|[ƒlƒ“ƒg
-    /// Às‚Ì“®ì‚É‚ÍˆêØŠÖ—^‚µ‚Ü‚¹‚ñiVRChatƒrƒ‹ƒh‚É‚Íœ‹‚³‚ê‚Ü‚·j
+    /// OSCå¿ƒæ‹è¨ˆãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®è¨­å®šã‚’ç®¡ç†ã™ã‚‹ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
+    /// å®Ÿè¡Œæ™‚ã®å‹•ä½œã«ã¯ä¸€åˆ‡é–¢ä¸ã—ã¾ã›ã‚“ï¼ˆVRChatãƒ“ãƒ«ãƒ‰æ™‚ã«ã¯é™¤å»ã•ã‚Œã¾ã™ï¼‰
     /// </summary>
     [HelpURL("https://bekosantux.github.io/shop-document/category/vrc-heart-rate/")]
     public class VRCHeartRateModuleManual : MonoBehaviour, IEditorOnly
