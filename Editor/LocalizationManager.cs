@@ -16,7 +16,7 @@ namespace BekoShop.VRCHeartRate
         private static string _localizationFolderPath;
 
         /// <summary>
-        /// ‚±‚ÌƒXƒNƒŠƒvƒg©g‚ÌƒpƒX‚©‚ç‘Š‘Î“I‚ÉLocalizationƒtƒHƒ‹ƒ_‚ÌƒpƒX‚ğæ“¾
+        /// ã“ã®ã‚¹ã‚¯ãƒªãƒ—ãƒˆè‡ªèº«ã®ãƒ‘ã‚¹ã‹ã‚‰ç›¸å¯¾çš„ã«Localizationãƒ•ã‚©ãƒ«ãƒ€ã®ãƒ‘ã‚¹ã‚’å–å¾—
         /// </summary>
         private static string LocalizationFolderPath
         {
@@ -24,7 +24,7 @@ namespace BekoShop.VRCHeartRate
             {
                 if (!string.IsNullOrEmpty(_localizationFolderPath)) return _localizationFolderPath;
 
-                // ‚±‚ÌƒXƒNƒŠƒvƒg(LocalizationManager)‚ÌGUID‚ğ’T‚·
+                // ã“ã®ã‚¹ã‚¯ãƒªãƒ—ãƒˆ(LocalizationManager)ã®GUIDã‚’æ¢ã™
                 var guids = AssetDatabase.FindAssets("t:Script LocalizationManager");
                 if (guids.Length == 0)
                 {
@@ -32,11 +32,11 @@ namespace BekoShop.VRCHeartRate
                     return null;
                 }
 
-                // GUID‚©‚çƒAƒZƒbƒgƒpƒX‚ğæ“¾
+                // GUIDã‹ã‚‰ã‚¢ã‚»ãƒƒãƒˆãƒ‘ã‚¹ã‚’å–å¾—
                 var scriptPath = AssetDatabase.GUIDToAssetPath(guids[0]);
-                // ƒXƒNƒŠƒvƒg‚ÌeƒfƒBƒŒƒNƒgƒŠ‚ğæ“¾
+                // ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®è¦ªãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’å–å¾—
                 var scriptDirectory = Path.GetDirectoryName(scriptPath);
-                // ‘Š‘Î“I‚ÉLocalizationƒtƒHƒ‹ƒ_‚ÌƒpƒX‚ğ‘g‚İ—§‚Ä‚é
+                // ç›¸å¯¾çš„ã«Localizationãƒ•ã‚©ãƒ«ãƒ€ã®ãƒ‘ã‚¹ã‚’çµ„ã¿ç«‹ã¦ã‚‹
                 _localizationFolderPath = Path.Combine(scriptDirectory, "Localization").Replace("\\", "/");
 
                 return _localizationFolderPath;
@@ -54,7 +54,7 @@ namespace BekoShop.VRCHeartRate
         }
 
         /// <summary>
-        /// ƒ[ƒJƒ‰ƒCƒY•¶Íæ“¾BƒL[‚ªŒ©‚Â‚©‚ç‚È‚¯‚ê‚ÎA‰pŒê‚ğƒtƒH[ƒ‹ƒoƒbƒNB‰pŒê‚à‚È‚¯‚ê‚ÎƒL[–¼‚ğ•Ô‚·B
+        /// ãƒ­ãƒ¼ã‚«ãƒ©ã‚¤ã‚ºæ–‡ç« å–å¾—ã€‚ã‚­ãƒ¼ãŒè¦‹ã¤ã‹ã‚‰ãªã‘ã‚Œã°ã€è‹±èªã‚’ãƒ•ã‚©ãƒ¼ãƒ«ãƒãƒƒã‚¯ã€‚è‹±èªã‚‚ãªã‘ã‚Œã°ã‚­ãƒ¼åã‚’è¿”ã™ã€‚
         /// </summary>
         public static string S(string key)
         {

@@ -33,26 +33,26 @@ namespace BekoShop.VRCHeartRate
         };
 
         [Header("Prefabs")]
-        [SerializeField, Tooltip("ƒAƒoƒ^[“à‚É1‚Â‚¾‚¯”z’u‚·‚éeƒvƒŒƒnƒui•K{j")]
+        [SerializeField, Tooltip("ã‚¢ãƒã‚¿ãƒ¼å†…ã«1ã¤ã ã‘é…ç½®ã™ã‚‹è¦ªãƒ—ãƒ¬ãƒãƒ–ï¼ˆå¿…é ˆï¼‰")]
         private GameObject parentContainerPrefab;
 
-        [SerializeField, Tooltip("ŠeƒIƒvƒVƒ‡ƒ“‚É‘Î‰‚·‚éqƒvƒŒƒnƒu")]
+        [SerializeField, Tooltip("å„ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã«å¯¾å¿œã™ã‚‹å­ãƒ—ãƒ¬ãƒãƒ–")]
         private GameObject[] optionPrefabs = new GameObject[OptionCount];
 
         [Header("Options")]
-        [SerializeField, Tooltip("ŠeƒIƒvƒVƒ‡ƒ“‚ğ”z’u‚·‚é‚©‚Ç‚¤‚©")]
+        [SerializeField, Tooltip("å„ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã‚’é…ç½®ã™ã‚‹ã‹ã©ã†ã‹")]
         private bool[] optionEnabled = new bool[OptionCount];
 
-        // ó‘Ô
+        // çŠ¶æ…‹
         private bool _isValidPlacement;
         private int _lastValidationFrame = -1;
 
-        // Undo‚Ì©“®Ä”z’u—}§iÃ“IF‘¼ƒCƒ“ƒXƒ^ƒ“ƒX‚Æ‚à‹¤—Lj
+        // Undoæ™‚ã®è‡ªå‹•å†é…ç½®æŠ‘åˆ¶ï¼ˆé™çš„ï¼šä»–ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã¨ã‚‚å…±æœ‰ï¼‰
         private static bool suppressAutoPlacement = false;
 
-        // ’x‰„ˆ—§Œä
+        // é…å»¶å‡¦ç†åˆ¶å¾¡
         private bool _placementScheduled;
-        // OnValidate “_‚Ì Undo ƒOƒ‹[ƒv
+        // OnValidate æ™‚ç‚¹ã® Undo ã‚°ãƒ«ãƒ¼ãƒ—
         private int _validateUndoGroup = -1;
 
         private void OnEnable()
@@ -85,7 +85,7 @@ namespace BekoShop.VRCHeartRate
             CancelScheduledProcess();
 
             suppressAutoPlacement = true;
-            // ”z’u‚Ì‘Ã“–«‚¾‚¯‚ÍXViÄ”z’u‚Ís‚í‚È‚¢j
+            // é…ç½®ã®å¦¥å½“æ€§ã ã‘ã¯æ›´æ–°ï¼ˆå†é…ç½®ã¯è¡Œã‚ãªã„ï¼‰
             EnsureValidPlacement();
             suppressAutoPlacement = false;
         }
@@ -102,10 +102,10 @@ namespace BekoShop.VRCHeartRate
 
             EnsureArrays();
 
-            // ¡‚Ì Undo ƒOƒ‹[ƒv ID ‚ğ‹L˜^
+            // ä»Šã® Undo ã‚°ãƒ«ãƒ¼ãƒ— ID ã‚’è¨˜éŒ²
             _validateUndoGroup = Undo.GetCurrentGroup();
 
-            // Šù‚É—\–ñÏ‚İ‚È‚çd•¡—\–ñ‚µ‚È‚¢
+            // æ—¢ã«äºˆç´„æ¸ˆã¿ãªã‚‰é‡è¤‡äºˆç´„ã—ãªã„
             ScheduleDelayedValidateAndProcess();
         }
 
@@ -120,23 +120,23 @@ namespace BekoShop.VRCHeartRate
 
         private void DelayedValidateAndProcess()
         {
-            // —\–ñ‚ğ‰ğœ
+            // äºˆç´„ã‚’è§£é™¤
             EditorApplication.delayCall -= DelayedValidateAndProcess;
             _placementScheduled = false;
 
-            // ƒIƒuƒWƒFƒNƒg‚ªÁ‚¦‚Ä‚¢‚½‚ç‰½‚à‚µ‚È‚¢
+            // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒæ¶ˆãˆã¦ã„ãŸã‚‰ä½•ã‚‚ã—ãªã„
             if (this == null) return;
             if (suppressAutoPlacement) return;
             if (BuildPipeline.isBuildingPlayer) return;
 
-            // V‚µ‚¢ƒOƒ‹[ƒv‚ğŠJ‚­
+            // æ–°ã—ã„ã‚°ãƒ«ãƒ¼ãƒ—ã‚’é–‹ã
             Undo.IncrementCurrentGroup();
             int myGroup = Undo.GetCurrentGroup();
 
-            // ŠK‘w‚ğ‘‚«Š·‚¦‚é
+            // éšå±¤ã‚’æ›¸ãæ›ãˆã‚‹
             PlaceParentAndOptionsIfNeeded();
 
-            // OnValidate ‚Éæ“¾‚µ‚½ƒOƒ‹[ƒv‚ÆŒ‹‡‚µ‚Ä1‘€ì‚É‚Ü‚Æ‚ß‚é
+            // OnValidate æ™‚ã«å–å¾—ã—ãŸã‚°ãƒ«ãƒ¼ãƒ—ã¨çµåˆã—ã¦1æ“ä½œã«ã¾ã¨ã‚ã‚‹
             if (_validateUndoGroup >= 0)
             {
                 Undo.CollapseUndoOperations(_validateUndoGroup);
@@ -148,7 +148,7 @@ namespace BekoShop.VRCHeartRate
             }
         }
 
-        // ŠO•”ƒAƒNƒZƒXiEditor—pj
+        // å¤–éƒ¨ã‚¢ã‚¯ã‚»ã‚¹ï¼ˆEditorç”¨ï¼‰
         public GameObject GetParentContainerPrefab() => parentContainerPrefab;
         public void SetParentContainerPrefab(GameObject prefab) => parentContainerPrefab = prefab;
 
@@ -187,7 +187,7 @@ namespace BekoShop.VRCHeartRate
             }
         }
 
-        // -------------------- “à•”À‘• --------------------
+        // -------------------- å†…éƒ¨å®Ÿè£… --------------------
 
         private bool EnsureValidPlacement()
         {
@@ -210,7 +210,7 @@ namespace BekoShop.VRCHeartRate
         {
             if (parentContainerPrefab == null) return;
 
-            // ƒAƒoƒ^[ƒ‹[ƒg‚Ìæ“¾
+            // ã‚¢ãƒã‚¿ãƒ¼ãƒ«ãƒ¼ãƒˆã®å–å¾—
             Transform avatarRoot = GetAvatarRootTransform();
             if (avatarRoot == null)
             {
@@ -218,7 +218,7 @@ namespace BekoShop.VRCHeartRate
                 return;
             }
 
-            // Šù‘¶‚ÌeƒvƒŒƒnƒu‚ğƒAƒoƒ^[ƒ‹[ƒg‚©‚ç GUID ‚ÅŒŸõi•—Dæ’Tõj
+            // æ—¢å­˜ã®è¦ªãƒ—ãƒ¬ãƒãƒ–ã‚’ã‚¢ãƒã‚¿ãƒ¼ãƒ«ãƒ¼ãƒˆã‹ã‚‰ GUID ã§æ¤œç´¢ï¼ˆå¹…å„ªå…ˆæ¢ç´¢ï¼‰
             string wantedGuid = GetPrefabAssetGUID(parentContainerPrefab);
             Transform parentNode = FindPrefabInstanceByGUID(avatarRoot, wantedGuid);
 
@@ -227,7 +227,7 @@ namespace BekoShop.VRCHeartRate
 
             bool createdParent = false;
 
-            // e‚ª‘¶İ‚µ‚È‚¢ê‡‚Ì‚İV‹K¶¬iƒXƒNƒŠƒvƒg‚Æ“¯ŠK‘w‚É”z’uj
+            // è¦ªãŒå­˜åœ¨ã—ãªã„å ´åˆã®ã¿æ–°è¦ç”Ÿæˆï¼ˆã‚¹ã‚¯ãƒªãƒ—ãƒˆã¨åŒéšå±¤ã«é…ç½®ï¼‰
             if (parentNode == null)
             {
                 Transform siblingsParent = transform.parent;
@@ -249,7 +249,7 @@ namespace BekoShop.VRCHeartRate
                 }
             }
 
-            // e‚ª‘¶İ‚·‚é‚È‚çq‚Ì•s‘«•ª‚ğ”z’u
+            // è¦ªãŒå­˜åœ¨ã™ã‚‹ãªã‚‰å­ã®ä¸è¶³åˆ†ã‚’é…ç½®
             if (parentNode != null)
             {
                 int createdCount = 0;
@@ -292,7 +292,7 @@ namespace BekoShop.VRCHeartRate
         }
 
         /// <summary>
-        /// AvatarRootPath() ‚ğg‚Á‚ÄƒAƒoƒ^[ƒ‹[ƒg‚ÌTransform‚ğæ“¾
+        /// AvatarRootPath() ã‚’ä½¿ã£ã¦ã‚¢ãƒã‚¿ãƒ¼ãƒ«ãƒ¼ãƒˆã®Transformã‚’å–å¾—
         /// </summary>
         private Transform GetAvatarRootTransform()
         {
@@ -307,7 +307,7 @@ namespace BekoShop.VRCHeartRate
                     avatarRootPath = avatarRootPath.Substring(1);
 
                 string[] pathSegments = avatarRootPath.Split('/');
-                // ƒpƒX‚ÌŠK‘w”•ª‚¾‚¯e‚ğ’H‚éi©•ª©g‚ğŠÜ‚Şj
+                // ãƒ‘ã‚¹ã®éšå±¤æ•°åˆ†ã ã‘è¦ªã‚’è¾¿ã‚‹ï¼ˆè‡ªåˆ†è‡ªèº«ã‚’å«ã‚€ï¼‰
                 for (int i = 0; i < pathSegments.Length; i++)
                 {
                     if (current == null || current.parent == null) return null;
@@ -331,7 +331,7 @@ namespace BekoShop.VRCHeartRate
         }
 
         /// <summary>
-        /// w’è‚³‚ê‚½ƒ‹[ƒg‚©‚ç•—Dæ‚ÅƒvƒŒƒnƒuƒCƒ“ƒXƒ^ƒ“ƒX‚ğ’Tõ‚µAGUID‚ªˆê’v‚·‚é‚à‚Ì‚ğ•Ô‚·
+        /// æŒ‡å®šã•ã‚ŒãŸãƒ«ãƒ¼ãƒˆã‹ã‚‰å¹…å„ªå…ˆã§ãƒ—ãƒ¬ãƒãƒ–ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’æ¢ç´¢ã—ã€GUIDãŒä¸€è‡´ã™ã‚‹ã‚‚ã®ã‚’è¿”ã™
         /// </summary>
         private static Transform FindPrefabInstanceByGUID(Transform root, string wantedGuid)
         {
@@ -344,7 +344,7 @@ namespace BekoShop.VRCHeartRate
             {
                 var current = queue.Dequeue();
 
-                // current ‚ªƒvƒŒƒnƒuƒCƒ“ƒXƒ^ƒ“ƒX‚Ìƒ‹[ƒg‚©ƒ`ƒFƒbƒN
+                // current ãŒãƒ—ãƒ¬ãƒãƒ–ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®ãƒ«ãƒ¼ãƒˆã‹ãƒã‚§ãƒƒã‚¯
                 var instanceRoot = PrefabUtility.GetNearestPrefabInstanceRoot(current.gameObject);
                 if (instanceRoot != null && instanceRoot == current.gameObject)
                 {
