@@ -14,7 +14,7 @@ BlendTree:
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
     m_CycleOffset: 0
-    m_DirectBlendParameter: VCRHR/Blend
+    m_DirectBlendParameter: VRCHR/Blend
     m_Mirror: 0
   m_BlendParameter: Blend
   m_BlendParameterY: Blend

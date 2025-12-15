@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1001 &608314386789665214
 PrefabInstance:
@@ -54,6 +54,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8013885672221133065, guid: 9e1f386601ade8a4bbf9404179c0a13f, type: 3}
       propertyPath: layerType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8013885672221133065, guid: 9e1f386601ade8a4bbf9404179c0a13f, type: 3}
+      propertyPath: layerPriority
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
