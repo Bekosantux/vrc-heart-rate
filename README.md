@@ -23,7 +23,7 @@ VRChatのアバターギミックで心拍数に関連する機能をひとま�
 ### 開発者向け情報
 すでにパラメーターは準備してあるので、すぐに心拍数を利用したギミックの開発に取りかかれます。  
 詳しくは以下のリンクをご参照ください。  
-https://shop.beko.ooo/category/vrc-heart-rate/
+https://shop.beko.ooo/vrc-heart-rate/development/ 
 
 ## 前提アセット
 このアセットの利用には、  
